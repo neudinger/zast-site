@@ -1,0 +1,110 @@
+---
+.title = "Examples — zast",
+.description = "Explore Zig code generation with JSON, zast, and WebAssembly. Everything runs in your browser.",
+.date = .date("2026-10-21T00:00:00"),
+.layout = "content.shtml",
+.custom = .{ .kind = "examples", .navigation = "examples" },
+---
+[]($section.id('intro').attrs('playground-intro','page-width'))
+
+> []($block.attrs('intro-copy'))
+>
+> [THE ZIG AST LAB]($text.attrs('eyebrow'))
+>
+> ~~~=html
+> <h1>Explore the tree. <em>See the source.</em></h1>
+> ~~~
+>
+> Edit a JSON description. Inspect the formatted Zig, builder, nodes, and tokens.
+
+[Zig + WebAssembly. Runs in web browser.]($text.attrs('runtime-note'))
+
+[]($section.attrs('playground-section'))
+
+~~~=html
+<section id="playground" class="workspace page-width" data-reading-surface="playground" aria-label="Code generation playground">
+
+      <div class="workspace-toolbar">
+        <div class="workspace-title"><span class="section-number">01</span><h2>Playground</h2><span class="scope-label">24 EXAMPLES</span></div>
+        <div class="workspace-actions">
+          <label class="sr-only" for="example-select">Example</label>
+          <select id="example-select">
+            <option value="constant">1. A constant</option>
+          </select>
+          <button type="button" id="reset-button"><img src="/icons/rotate-ccw.svg" alt="" class="icon">Reset</button>
+          <button type="button" id="share-button" class="quiet-button"><img src="/icons/share.svg" alt="" class="icon">Share</button>
+          <button type="button" id="download-button" class="accent-button" disabled><img src="/icons/download.svg" alt="" class="icon">Download .zig</button>
+        </div>
+      </div>
+
+      <div class="example-context playground-context"><span id="example-position">01 / 24</span><p id="example-description">Select a recipe and edit its JSON input.</p><a id="example-guide" href="/docs/examples/#constant">View example ↗</a></div>
+      <div class="code-reading-controls" role="group" aria-label="Code reading preferences">
+        <label>Code size <select data-code-size aria-label="Code font size"><option value="">Default</option><option value="14">14px</option><option value="16">16px</option><option value="18">18px</option><option value="20">20px</option><option value="24">24px</option><option value="28">28px</option></select></label>
+        <label><input type="checkbox" data-code-wrap>Wrap lines</label>
+        <button type="button" data-code-focus aria-pressed="false" aria-controls="json-input-pane">Read full width</button>
+      </div>
+      <div class="editors">
+        <section id="json-input-pane" class="editor-pane input-pane" aria-labelledby="input-heading">
+          <div class="pane-toolbar">
+            <div class="file-label"><img src="/icons/file.svg" alt="" class="icon"><h3 id="input-heading">description.json</h3></div>
+            <span class="live-label"><span></span> LIVE</span>
+          </div>
+          <div class="input-editor">
+            <pre class="line-numbers" id="input-lines" aria-hidden="true">1</pre>
+            <pre id="input-highlight" class="input-highlight" aria-hidden="true"></pre>
+            <label class="sr-only" for="json-input">Editable example description</label>
+            <textarea id="json-input" spellcheck="false" autocomplete="off" autocapitalize="off" aria-describedby="input-guidance">{
+  "name": "Status",
+  "backing_type": "u8",
+  "non_exhaustive": true,
+  "fields": [
+    { "name": "unknown", "value": 0 },
+    { "name": "ok", "value": 1 },
+    { "name": "warning", "value": 2 }
+  ]
+}</textarea>
+          </div>
+          <div id="input-error" class="input-error" role="alert" hidden></div>
+          <div class="pane-footer"><span id="input-guidance">JSON recipe or enum description · 4 KiB maximum</span><span id="input-size">0 B</span></div>
+        </section>
+
+        <section class="editor-pane output-pane" aria-label="Generator output">
+          <div class="pane-toolbar output-toolbar">
+            <div class="output-tabs" role="tablist" aria-label="Output view">
+              <button id="tab-zig" role="tab" aria-selected="true" aria-controls="panel-zig" data-view="zig" type="button">Zig source</button>
+              <button id="tab-api" role="tab" aria-selected="false" aria-controls="panel-api" data-view="api" type="button">zast API</button>
+              <button id="tab-ast" role="tab" aria-selected="false" aria-controls="panel-ast" data-view="ast" type="button">AST</button>
+              <button id="tab-tokens" role="tab" aria-selected="false" aria-controls="panel-tokens" data-view="tokens" type="button">Tokens</button>
+            </div>
+            <button type="button" id="copy-button" class="copy-button" disabled><img src="/icons/copy.svg" alt="" class="icon"><span data-copy-label>Copy</span></button>
+          </div>
+          <div id="panel-zig" role="tabpanel" aria-labelledby="tab-zig" class="output-content" tabindex="0">
+            <div class="output-caption"><img src="/icons/file.svg" alt="" class="icon"><span id="output-filename">Status.zig</span><span>FORMATTED OUTPUT</span></div>
+            <div id="zig-output" class="code-output" aria-label="Generated formatted Zig"><div class="code-line"><span class="line-number">1</span><code>Loading the Zig generator…</code></div></div>
+            <div class="source-note">Generated by <code>std.zig.Ast.renderAlloc()</code></div>
+          </div>
+          <div id="panel-api" role="tabpanel" aria-labelledby="tab-api" class="output-content" tabindex="0" hidden>
+            <div class="output-caption"><img src="/icons/file.svg" alt="" class="icon"><span>generate.zig</span><span>EQUIVALENT BUILDER</span></div>
+            <div id="api-output" class="code-output" aria-label="Equivalent complete zast builder"></div>
+          </div>
+          <div id="panel-ast" role="tabpanel" aria-labelledby="tab-ast" class="output-content inspector" tabindex="0" hidden>
+            <div class="inspector-heading"><span>Actual generated nodes</span><span id="node-count"></span></div>
+            <div class="inspector-table-wrap"><table><thead><tr><th>Node</th><th>Tag</th><th>Main token</th></tr></thead><tbody id="node-rows"></tbody></table></div>
+            <div class="token-detail" id="node-detail">Select a node to inspect its main token.</div>
+          </div>
+          <div id="panel-tokens" role="tabpanel" aria-labelledby="tab-tokens" class="output-content inspector" tabindex="0" hidden>
+            <div class="inspector-heading"><span>Source spellings &amp; syntax</span><span id="token-count"></span></div>
+            <div class="inspector-table-wrap"><table><thead><tr><th>Index</th><th>Tag</th><th>Spelling</th></tr></thead><tbody id="token-rows"></tbody></table></div>
+          </div>
+          <div class="pane-footer"><span id="output-status" role="status" aria-live="polite">Preparing WebAssembly…</span><span id="output-metrics"></span></div>
+        </section>
+      </div>
+      <div class="workspace-status">
+        <span class="runtime-label"><span class="status-dot"></span> Zig + zast <span class="status-divider">/</span> WebAssembly</span>
+        <span class="pipeline-label">JSON <span>→</span> AST <span>→</span> Zig</span>
+        <span class="privacy-label">Your input stays in this browser.</span>
+      </div>
+    </section>
+~~~
+
+[]($section.id('how-it-works').attrs('architecture','page-width'))

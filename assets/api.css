@@ -1,0 +1,74 @@
+/* Use the site's palette and typography with Zig's generated DOM hooks. */
+.api-reference { padding-block: 46px 64px; }
+.api-reference[data-reading-surface] { --code-font-size: .8125rem; --code-line-height: 1.85; }
+.api-intro { padding-bottom: 30px; }
+.api-intro h1 { font-size: clamp(36px, 4vw, 58px); letter-spacing: -2px; margin-bottom: 16px; }
+.api-intro > p:last-child { color: var(--muted); margin: 0; }
+.api-content { min-width: 0; padding: clamp(18px, 3vw, 40px); border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--muted); }
+.api-reference .hidden { display: none !important; }
+.api-reference a { color: var(--accent); text-decoration: underline; text-underline-offset: 4px; }
+.api-reference a:hover { color: #d0ffe9; }
+.api-reference p { margin: 0 0 20px; }
+.api-reference h2, .api-reference h3 { line-height: 1.35; letter-spacing: -.5px; font-weight: 550; margin: 32px 0 16px; }
+.api-reference h2 { font-size: 26px; }
+.api-reference h3 { font-size: 21px; }
+.api-reference strong { color: var(--text); font-weight: 600; }
+.api-reference ul, .api-reference ol { padding-left: 24px; }
+.api-reference li { margin-block: 8px; }
+.api-reference code { font: .9em/1.8 var(--mono); overflow-wrap: anywhere; }
+.api-reference :not(pre) > code { color: var(--accent); white-space: break-spaces; }
+.api-reference pre { margin: 20px 0; padding: 20px; overflow: auto; border: 1px solid var(--line); border-radius: 6px; background: var(--editor); color: var(--text); font: var(--code-font-size, .8125rem)/var(--code-line-height, 1.85) var(--mono); tab-size: 4; }
+.api-reference pre code { font: inherit; white-space: pre; overflow-wrap: normal; }
+.api-reference.wrap-code pre, .api-reference.wrap-code pre code { white-space: pre-wrap; overflow-wrap: normal; word-break: normal; }
+.api-reference #navWrap { padding-bottom: 22px; margin-bottom: 28px; border-bottom: 1px solid var(--line); }
+.api-reference #search { width: 100%; min-height: 48px; padding: 12px 16px; border: 1px solid var(--line); border-radius: 6px; background: var(--editor); color: var(--text); font: 15px/1.5 var(--mono); }
+.api-reference #search::placeholder { color: var(--quiet); }
+.api-reference #search:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.api-reference #listNav { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0 0; padding: 0; list-style: none; }
+.api-reference #listNav li { min-width: 0; margin: 0; }
+.api-reference #listNav a { display: block; padding: 6px 12px; border: 1px solid var(--line-soft); border-radius: 4px; color: var(--muted); font: 13px/1.6 var(--mono); text-decoration: none; overflow-wrap: anywhere; }
+.api-reference #listNav a:hover, .api-reference #listNav a.active { color: var(--accent); border-color: var(--accent); background: var(--elevated); }
+.api-reference #hdrName { display: flex; flex-wrap: wrap; align-items: center; gap: 16px; font: 26px/1.4 var(--mono); letter-spacing: -.5px; margin: 0 0 24px; }
+.api-reference #hdrName a { font-size: 13px; letter-spacing: 0; }
+.api-reference #tldDocs { max-width: 960px; line-height: 1.85; }
+.api-reference table { display: block; max-width: 100%; overflow: auto; border-collapse: collapse; margin: 24px 0; text-align: left; }
+.api-reference th, .api-reference td { padding: 13px 16px; border-bottom: 1px solid var(--line-soft); vertical-align: top; }
+.api-reference th { color: var(--text); font-size: 13px; font-weight: 600; }
+.api-reference dl { margin: 0; }
+.api-reference dl > div { margin-top: 14px; padding: 18px; border: 1px solid var(--line); border-radius: 6px; overflow-wrap: anywhere; }
+.api-reference dt { color: var(--text); }
+.api-reference dd { margin: 12px 0 0; }
+.api-reference .fieldDocs { padding: 12px 16px; border: 1px solid var(--line-soft); border-top: 0; }
+.api-reference #listFields > div, .api-reference #listParams > div { margin-bottom: 14px; overflow-wrap: anywhere; }
+.api-reference ul.columns { columns: 16rem; column-gap: 24px; padding: 0; list-style: none; }
+.api-reference .columns li { break-inside: avoid; margin: 0 0 10px; }
+.api-reference .columns a { display: block; padding: 10px 14px; border: 1px solid var(--line-soft); border-radius: 5px; background: var(--editor); font: 13px/1.7 var(--mono); text-decoration: none; overflow-wrap: anywhere; }
+.api-reference .columns a:hover { border-color: var(--accent); }
+.api-reference #listSearchResults { list-style: none; padding: 0; }
+.api-reference #listSearchResults li { padding: 12px 16px; border: 1px solid var(--line-soft); border-radius: 5px; overflow-wrap: anywhere; }
+.api-reference #listSearchResults li.selected { background: var(--elevated); border-color: var(--accent); }
+.api-reference .source-code { display: grid; grid-template-columns: auto minmax(0, 1fr); border: 1px solid var(--line); border-radius: 6px; background: var(--editor); overflow: hidden; }
+.api-reference .source-code pre { margin: 0; border: 0; border-radius: 0; }
+.api-reference.wrap-code .source-code pre, .api-reference.wrap-code .source-code pre code { white-space: pre; }
+.api-reference .source-line-numbers pre { text-align: right; padding-inline: 12px; color: var(--quiet); user-select: none; }
+.api-reference .source-text { min-width: 0; overflow: auto; }
+.api-reference .tok-kw, .api-reference .tok-type { color: var(--purple); }
+.api-reference .tok-str { color: var(--red); }
+.api-reference .tok-builtin { color: var(--cyan); }
+.api-reference .tok-comment { color: var(--quiet); font-style: italic; }
+.api-reference .tok-fn { color: var(--accent); }
+.api-reference .tok-number, .api-reference .tok-null { color: #f4ba93; }
+.api-reference kbd { display: inline-block; padding: 2px 7px; border: 1px solid var(--line); border-radius: 4px; background: var(--editor); color: var(--text); font: 12px/1.7 var(--mono); }
+.api-reference #helpDialog { position: fixed; inset: 50% auto auto 50%; transform: translate(-50%, -50%); z-index: 30; width: min(440px, calc(100% - 36px)); max-height: calc(100vh - 48px); overflow: auto; padding: 28px; border: 1px solid var(--accent); border-radius: 8px; background: var(--surface); box-shadow: 0 20px 80px #0008; }
+.api-reference #helpDialog h1, .api-reference #errors h1 { font-size: 24px; line-height: 1.3; letter-spacing: -.5px; margin: 0 0 20px; }
+.api-reference #helpDialog dl { display: flex; align-items: baseline; gap: 12px; margin-block: 10px; }
+.api-reference #helpDialog dd { margin: 0; }
+.api-reference #errors { position: fixed; inset: auto 18px 18px; z-index: 40; max-height: 40vh; overflow: auto; padding: 20px; border: 1px solid var(--red); border-radius: 6px; background: var(--surface); color: var(--red); }
+@media (max-width: 700px) {
+  .api-reference { padding-block: 30px 44px; }
+  .api-intro { padding-bottom: 24px; }
+  .api-reference #search { font-size: 13px; }
+  .api-reference pre { padding: 16px; }
+  .api-reference th, .api-reference td { padding: 10px; }
+  .api-reference dl > div { padding: 14px; }
+}

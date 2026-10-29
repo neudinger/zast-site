@@ -1,0 +1,59 @@
+---
+.title = "A static page, a real Zig generator",
+.description = "How SuperMD, Zig, and zast divide the work between build time and browser time.",
+.date = .date("2026-10-21T00:00:00"),
+.layout = "content.shtml",
+.custom = .{ .kind = "article", .navigation = "blog" },
+---
+Published **2026-10-21**.
+
+# Two build steps
+
+The website and the generator are separate build products. **Zine** parses
+the SuperMD content and renders shared SuperHTML layouts, navigation, and assets.
+A native Zig coordinator validates the complete release. **Zig 0.17.0** compiles
+the generator and the sibling zast library for `wasm32-freestanding`. The final
+site contains HTML, CSS, JavaScript, artwork, and the compiled `.wasm` asset.
+
+The site source lives outside the library. Documentation, posts, and the browser
+integration can evolve without becoming part of the library's source tree.
+
+# A small browser boundary
+
+JavaScript loads the precompiled module and copies the input JSON into its
+memory. The Zig bridge validates the enum description, builds `zast.Field`
+values, emits a `zast.EnumDeclaration` into an `AstContext`, and calls
+`finish()` followed by `renderAlloc()`.
+
+The browser receives formatted source and inspected AST data. The output views
+show the Zig source, equivalent builder code, actual node tags, and actual token
+spellings. Input edits invoke the same local module; the host serves static
+assets and does not generate code.
+
+# Descriptions are the editable input
+
+JSON is a small runtime description of the constructs the compiled generator
+supports. The equivalent builder view makes that description's connection to
+the Zig API visible. It is explanatory output, not an editor backed by a Zig
+compiler.
+
+The first example supports inferred and explicit enum backing types, signed
+values, empty enums, and non-exhaustive tags. Arbitrary edited Zig compilation,
+struct generation, and function generation are not part of this browser bridge.
+Those library components can be exposed by future examples with their own input
+contracts.
+
+# Keep the feedback loop inspectable
+
+Invalid input displays a diagnostic while preserving the last successful output.
+Copy and download operate locally. Shared URLs intentionally encode the selected
+input; the example has no generation API, analytics, or external editor service.
+
+[Open the enum example](/examples/) or
+[build your first declaration locally](/docs/getting-started/).
+
+# References
+
+- [SuperMD content and directives](https://zine-ssg.io/docs/supermd/)
+- [Zine build integration](https://zine-ssg.io/docs/zig/)
+- [Zig 0.17 WebAssembly documentation](https://ziglang.org/documentation/0.17.0/#WebAssembly)

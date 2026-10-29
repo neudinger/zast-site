@@ -1,0 +1,54 @@
+---
+.title = "Documentation",
+.description = "Descriptions, syntax trees, and formatted source. Start small and compose the next construct.",
+.date = .date("2026-10-21T00:00:00"),
+.layout = "content.shtml",
+.custom = .{ .kind = "article", .navigation = "docs" },
+---
+# Start here
+
+[Generate your first declaration](/docs/getting-started/) shows a complete,
+testable example, including allocation and cleanup. Then use the
+[playground](/examples/) to inspect how changing a description changes the
+source, tokens, and nodes.
+
+Browse the [copyable example catalogue](/docs/examples/) for all README examples
+and larger compositions.
+
+Browse the [API reference](/docs/api/) for component declarations, method
+documentation, ownership contracts, and source. It is generated from the same
+library checkout and Zig compiler as this site's playground.
+
+# The parts you compose
+
+| Component | Responsibility |
+| --- | --- |
+| `zast.Expression` | Values, operators, calls, initializers, and type expressions. |
+| `zast.Field` | A borrowed field name with optional type and value expressions. |
+| `zast.Declaration` | A named constant or variable. |
+| `zast.EnumDeclaration`, `zast.UnionDeclaration`, `zast.StructDeclaration` | Container descriptions and their named declarations. |
+| `zast.FunctionDeclaration`, `zast.Block` | Functions and sequences of executable statements. |
+| `zast.AstContext` | Token spellings, token indexes, node links, and extra AST data. |
+
+`emitType()` returns an anonymous type node for another construct to embed.
+`emit()` writes a named declaration and registers it with the enclosing context.
+The descriptions borrow their strings and slices; keep that data alive until
+emission completes.
+
+# Containers and blocks
+
+A container groups members of a type, such as enum fields, struct fields, or
+methods. A block groups executable statements inside braces. They use different
+Zig AST node layouts even though both contain an ordered sequence.
+
+# Rendering and validation
+
+Token spellings preserve names and literal text. Nodes describe relationships.
+Both must agree before the standard-library renderer can produce formatted Zig.
+`context.source.items` is the intermediate token text, not the formatted result.
+
+Finalization connects the root declarations and transfers AST storage. It does
+not parse or type-check the generated program. For a generator project, compare
+rendering with parsed expected source and compile representative output with the
+same Zig version used by the library.
+

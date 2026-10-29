@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head id="site-head">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="$page.description">
+  <meta name="theme-color" content="#0b1613">
+  <title :text="$page.title"></title>
+  <link rel="icon" type="image/svg+xml" href="$site.asset('favicon.svg').link()">
+  <link rel="stylesheet" href="$site.asset('site.css').link()">
+  <script type="module" src="$site.asset('site.js').link()"></script>
+  <script type="module" src="$site.asset('reading.js').link()"></script>
+<ctx :if="$page.custom.get('kind').eql('home').or($page.custom.get('kind').eql('examples'))"><script type="module" src="$site.asset('playground.js').link()"></script></ctx>
+<super>
+</head>
+<body data-wasm="$build.asset('playground').link()" data-page="$page.custom.get('kind')">
+  <a class="skip-link" href="#site-content">Skip to content</a>
+  <header class="site-header"><div class="page-width header-inner">
+    <a class="$site.index().isCurrent().then('brand active', 'brand')" href="$site.index().link()" aria-label="zast home" aria-current="$site.index().isCurrent().then('page', 'false')"><span>zast</span><span class="brand-separator">/</span><span class="brand-product">Zig Abstract Syntax Tree</span></a>
+    <nav class="primary-nav" aria-label="Main navigation">
+      <a href="$site.page('docs').link()" class="$page.custom.get('navigation').eql('docs').then('active')" aria-current="$site.page('docs').isCurrent().then('page', 'false')">Documentation</a>
+      <a href="$site.page('docs/api').link()" class="$page.custom.get('navigation').eql('api').then('active')" aria-current="$site.page('docs/api').isCurrent().then('page', 'false')">API Reference</a>
+      <a href="$site.page('blog').link()" class="$page.custom.get('navigation').eql('blog').then('active')" aria-current="$site.page('blog').isCurrent().then('page', 'false')">Blog</a>
+      <a href="$site.page('examples').link()" class="$page.custom.get('navigation').eql('examples').then('active')" aria-current="$site.page('examples').isCurrent().then('page', 'false')">Playground</a>
+    </nav>
+  </div></header>
+  <main id="site-content"><super></main>
+  <footer class="site-footer page-width"><span class="footer-brand">zast<span> · Zig Abstract Syntax Tree</span></span><div><a href="$site.page('docs').link()">Documentation</a><span>·</span><a href="https://zine-ssg.io/docs/supermd/" target="_blank" rel="noreferrer">Built with SuperMD</a></div></footer>
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+</body>
+</html>

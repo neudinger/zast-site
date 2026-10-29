@@ -1,0 +1,91 @@
+---
+.title = "Your first declaration",
+.description = "Build an inferred enum, render its Zig source, and release every owned buffer.",
+.date = .date("2026-10-21T00:00:00"),
+.layout = "content.shtml",
+.custom = .{ .kind = "article", .navigation = "docs" },
+---
+# A complete example
+
+From the sibling `zast` library directory, save this as `example_test.zig`.
+The test uses `std.testing.allocator` so allocation leaks are reported.
+
+```zig
+const std = @import("std");
+const zast = @import("zast");
+
+test "render an inferred enum" {
+    const allocator = std.testing.allocator;
+    var context: zast.AstContext = .{};
+    defer context.deinit(allocator);
+    _ = try context.addNode(allocator, .root, 0, undefined);
+
+    const status: zast.EnumDeclaration = .{
+        .backing_type = null,
+        .fields = &.{
+            .{ .name = "unknown" },
+            .{ .name = "ok" },
+        },
+    };
+    try status.emit(allocator, &context, "Status", .public);
+
+    var tree = try context.finish(allocator);
+    const owned_source = tree.source;
+    defer allocator.free(owned_source);
+    defer tree.deinit(allocator);
+
+    const rendered_source = try tree.renderAlloc(allocator);
+    defer allocator.free(rendered_source);
+    try std.testing.expectEqualStrings(
+        "pub const Status = enum {\n" ++
+            "    unknown,\n" ++
+            "    ok,\n" ++
+            "};\n",
+        rendered_source,
+    );
+}
+```
+
+Run it from the `zast` library directory:
+
+```console
+$ zig test --dep zast -Mroot=example_test.zig -Mzast=src/root.zig
+```
+
+The value of `rendered_source` is:
+
+```zig
+pub const Status = enum {
+    unknown,
+    ok,
+};
+```
+
+# Follow the lifecycle
+
+1. Create an empty unmanaged `zast.AstContext` and reserve node zero as `.root`.
+   Its placeholder data is filled by `finish()`.
+2. Describe an enum. This stack value borrows its field slice and names; no
+   descriptor allocation is needed for this fixed example.
+3. Call `emit()` with the allocator and context. It emits the declaration's
+   token spellings and node links, then registers the declaration at the root.
+4. Call `finish()` once after emission. The resulting tree owns its token,
+   node, and extra-data buffers. Its source allocation is released separately.
+5. Call `renderAlloc()` to allocate the formatted Zig string.
+6. Release the formatted string, AST buffers, saved source slice, and remaining
+   context buffers. Zig executes the `defer` statements in reverse order.
+
+Use the same allocator for all operations on a context and its finished tree.
+Descriptions can use another arena, but every borrowed name, field slice, and
+recursive expression must stay valid until emission finishes. After an emission
+or finalization allocation failure, clean up the partial context; do not render
+or retry it as a complete AST.
+
+# Change one property
+
+A `null` backing type generates `enum { ... }`. Set `.backing_type = "u8"` to
+emit `enum(u8) { ... }`. Explicit field values and a non-exhaustive catch-all
+require an explicit backing type. Use the [online examples](/examples/) to inspect
+those forms without setting up another native program.
+
+[Return to the documentation overview](/docs/).

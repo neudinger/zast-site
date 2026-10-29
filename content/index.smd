@@ -1,0 +1,101 @@
+---
+.title = "zast — Write in Zig. Emit Zig.",
+.description = "Compose Zig syntax trees, generate readable source, and explore every node. Documentation, design notes, and a browser-local playground.",
+.date = .date("2026-10-22T00:00:00"),
+.layout = "content.shtml",
+.custom = .{ .kind = "home", .navigation = "home" },
+---
+[]($section.id('intro').attrs('landing-hero','page-width'))
+
+> []($block.attrs('intro-copy'))
+>
+> ~~~=html
+> <h1>Write in Zig. <em>Emit Zig.</em></h1>
+> ~~~
+>
+> Compose Zig syntax trees.\
+> Generate readable source.\
+> Explore every node.
+>
+> [Open playground]($link.page('examples').attrs('primary-link','open-playground'))
+> [Read the docs]($link.page('docs').attrs('secondary-link'))
+>
+> ~~~=html
+> <p id="tree-legend" class="tree-legend"><span>Branches: declarations &amp; expressions</span><span>Leaves: types &amp; values</span></p>
+> ~~~
+
+~~~=html
+<figure id="ast-tree" class="ast-tree" aria-label="Syntax tree for the current example" aria-describedby="tree-legend">
+  <p class="tree-loading">Growing the syntax tree…</p>
+</figure>
+~~~
+
+[]($section.id('examples').attrs('home-showcase','page-width'))
+
+~~~=html
+<section class="home-example" data-reading-surface="home" aria-label="Zig interface to generated Zig example">
+  <div class="example-toolbar">
+    <div class="rotation-controls"><button type="button" id="rotation-button" aria-label="Pause automatic example rotation">Pause</button><span id="rotation-status">Every 12s</span></div>
+    <div class="example-navigation" role="group" aria-label="Example navigation">
+      <button type="button" id="previous-example-button" aria-label="Previous example" aria-controls="api-output zig-output">Previous</button>
+      <label class="example-picker"><img src="/icons/play.svg" alt="" class="icon"><span class="sr-only">Try an example</span>
+        <select id="example-select" aria-label="Try an example">
+          <option value="constant">1. A constant</option>
+        </select>
+      </label>
+      <button type="button" id="next-example-button" aria-label="Next example" aria-controls="api-output zig-output">Next</button>
+    </div>
+  </div>
+  <div class="code-reading-controls" role="group" aria-label="Code reading preferences">
+    <label>Code size <select data-code-size aria-label="Code font size"><option value="">Default</option><option value="14">14px</option><option value="16">16px</option><option value="18">18px</option><option value="20">20px</option><option value="24">24px</option><option value="28">28px</option></select></label>
+    <label><input type="checkbox" data-code-wrap>Wrap lines</label>
+  </div>
+  <div class="rotation-track" aria-hidden="true"><span id="rotation-progress"></span></div>
+  <div class="example-editors editors">
+    <section class="editor-pane input-pane" aria-labelledby="input-heading">
+      <div class="pane-toolbar"><div class="file-label"><img src="/icons/file.svg" alt="" class="icon"><h2 id="input-heading">zast interface</h2></div></div>
+      <div class="output-content" tabindex="0" aria-label="Zig API example, read only"><div id="api-output" class="code-output"><div class="code-line"><span class="line-number">1</span><code>Loading the Zig example…</code></div></div></div>
+      <div id="input-error" class="input-error" role="alert" hidden></div>
+    </section>
+    <section class="editor-pane output-pane" aria-label="Generated Zig source">
+      <div class="pane-toolbar"><div class="file-label"><img src="/icons/file.svg" alt="" class="icon"><h2 id="output-filename">Status.zig</h2></div></div>
+      <div id="panel-zig" class="output-content" tabindex="0" aria-label="Generated Zig source, read only"><div id="zig-output" class="code-output" aria-label="Generated formatted Zig"><div class="code-line"><span class="line-number">1</span><code>Loading the Zig generator…</code></div></div></div>
+      <span id="output-status" class="sr-only" role="status" aria-live="off">Preparing WebAssembly…</span><span id="output-metrics" class="sr-only"></span>
+    </section>
+  </div>
+  <div class="example-context"><span id="example-position">01 / 24</span><p id="example-description">A constant from the zast README.</p><a id="example-guide" href="/docs/examples/#constant">View example <span aria-hidden="true">↗</span></a></div>
+  <div class="example-footer">
+    <!-- <p>Runs locally in your browser <span aria-hidden="true">·</span> Zig + WebAssembly</p> -->
+    <div class="example-actions">
+      <button type="button" id="copy-button" disabled><img src="/icons/copy.svg" alt="" class="icon"><span data-copy-label>Copy</span></button>
+      <button type="button" id="download-button" disabled><img src="/icons/download.svg" alt="" class="icon">Download</button>
+      <button type="button" id="share-button"><img src="/icons/share.svg" alt="" class="icon">Share</button>
+      <button type="button" id="reset-button"><img src="/icons/rotate-ccw.svg" alt="" class="icon">Reset</button>
+    </div>
+  </div>
+</section>
+~~~
+
+[]($section.id('how-it-works').attrs('generation-flow','page-width'))
+
+- [01]($text.attrs('step-index'))
+
+  # Compose
+
+  Describe your code with the zast Zig interface.
+
+- [02]($text.attrs('step-index'))
+
+  # Build the AST
+
+  Emit your components into a shared AST context.
+
+- [03]($text.attrs('step-index'))
+
+  # Render Zig
+
+  Format the tree into readable Zig source.
+
+- [Understand the tree]($link.page('docs').attrs('flow-link'))
+
+  Learn about the nodes, structure, and ownership rules in the documentation.

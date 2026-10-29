@@ -1,0 +1,24 @@
+---
+.title = "Copyable examples — zast",
+.description = "The README examples and larger compositions: zast interfaces beside generated Zig.",
+.layout = "content.shtml",
+.date = .date("2026-10-22T00:00:00"),
+.custom = .{ .kind = "article", .navigation = "docs" },
+---
+
+# Reading the examples
+
+The first 15 groups mirror the local zast copyable example guide. The three
+composed showcases combine those components. Every live output is generated in
+WebAssembly. Recipe JSON selects a compiled generator; it is not arbitrary Zig
+compilation. Edit a recipe's `name` to rename its primary declaration, or edit
+`schema` in the two schema lessons. Enum variations accept complete field lists.
+
+The snippets assume `const zast = @import("zast");`, an allocator, and an
+initialized `context: *zast.AstContext` with its root reserved. Borrowed
+expressions and descriptors remain alive through emission. Finish the context
+once, render with `tree.renderAlloc(allocator)`, and release the tree and its
+separately owned source. The playground's **zast API** view includes this setup.
+
+[Open the playground]($link.page('examples'))
+

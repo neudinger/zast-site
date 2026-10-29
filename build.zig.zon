@@ -1,0 +1,25 @@
+.{
+    .name = .zast_site,
+    .version = "0.0.0",
+    .fingerprint = 0x20b2f643304267ef, // Changing this has security and trust implications.
+    .minimum_zig_version = "0.17.0",
+    .dependencies = .{
+        .zine = .{
+            .url = "git+https://github.com/kristoff-it/zine#6c9782957f46cf1162aa6fe8e881162b2d31480e",
+            .hash = "zine-0.14.1-ou6nIJKIFwBEjCLNI4Hryh9YWa73Rm_DCsypWHbEp5l8",
+        },
+    },
+    .paths = .{
+        "build.zig",
+        "build.zig.zon",
+        "zine.ziggy",
+        "layouts",
+        "content",
+        "tools",
+        "assets",
+        "wasm",
+        "tests",
+        "art",
+        "README.md",
+    },
+}
