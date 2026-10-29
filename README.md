@@ -45,13 +45,6 @@ for changes to the library, Wasm sources, or generated example snapshots.
 
 Generated files: `assets/catalog.js`, `content/docs/examples.smd`,
 `wasm/GuideExamples.zig`, `wasm/guide-catalog.json`, and `dist/`.
-Ordinary builds regenerate them; edit their source inputs instead.
-See the [generated-file map](DEVELOPMENT.md#generated-files) for individual commands.
-
-## Maintainer reference
-
-[DEVELOPMENT.md](DEVELOPMENT.md) covers all commands, cleanup, authoring, build
-internals, API generation, compatibility limitations, private publication, and rollback.
 
 ## License
 
