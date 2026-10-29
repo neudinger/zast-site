@@ -1,6 +1,6 @@
 @font-face {
   font-family: Inter;
-  src: url("/fonts/InterVariable.woff2") format("woff2");
+  src: url("fonts/InterVariable.woff2") format("woff2");
   font-style: normal;
   font-weight: 100 900;
   font-display: swap;
@@ -66,7 +66,7 @@ body[data-page="home"] main { position: relative; isolation: isolate; min-height
 .landing-hero .tree-legend { display: flex; gap: 8px 24px; flex-wrap: wrap; margin: 22px 0 0; color: var(--muted); font-size: 12px; }
 .ast-tree { position: relative; align-self: stretch; min-width: 0; margin: 0 -22px 0 0; isolation: isolate; }
 .ast-tree-stage { position: relative; height: calc(430px + var(--tree-extra-height, 0px)); }
-.ast-tree::before { content: ""; position: absolute; inset: -15px -38px -5px -45px; z-index: -1; background: url("/ast-forest.webp") center / cover no-repeat; mask-image: radial-gradient(ellipse at 54% 52%, black 30%, transparent 72%); opacity: .8; pointer-events: none; }
+.ast-tree::before { content: ""; position: absolute; inset: -15px -38px -5px -45px; z-index: -1; background: url("ast-forest.webp") center / cover no-repeat; mask-image: radial-gradient(ellipse at 54% 52%, black 30%, transparent 72%); opacity: .8; pointer-events: none; }
 .ast-tree-canvas { display: block; width: 100%; height: 100%; }
 .ast-tree-labels { position: absolute; inset: 0; pointer-events: none; }
 .ast-tree-labels button { position: absolute; display: inline-flex; align-items: flex-start; gap: 6px; pointer-events: auto; max-width: 160px; padding: 4px 5px; border: 1px solid transparent; border-radius: 4px; background: #0b1613a6; color: var(--text); font: 12px/1.4 var(--mono); text-shadow: 0 1px 4px var(--background); text-align: left; }
@@ -87,7 +87,7 @@ body[data-page="home"] main { position: relative; isolation: isolate; min-height
 .code-line.tree-selected { background: #a1f0d023; box-shadow: inset 2px 0 var(--accent); }
 .primary-link, .secondary-link { display: inline-flex; align-items: center; justify-content: center; gap: 15px; min-height: 52px; padding: 12px 24px; border: 1px solid var(--line); border-radius: 6px; font-size: 15px; font-weight: 500; }
 .primary-link { color: #09271c; background: var(--accent); border-color: var(--accent); }
-.primary-link::after { content: ""; width: 19px; height: 19px; background: currentColor; mask: url("/icons/arrow-right.svg") center / contain no-repeat; }
+.primary-link::after { content: ""; width: 19px; height: 19px; background: currentColor; mask: url("icons/arrow-right.svg") center / contain no-repeat; }
 .primary-link:hover { background: #c3ffe5; border-color: #c3ffe5; }
 .secondary-link:hover { border-color: var(--accent); color: var(--accent); }
 .home-example { min-width: 0; }
@@ -144,14 +144,14 @@ textarea[aria-invalid="true"] { box-shadow: inset 0 0 0 1px var(--red); }
 .generation-flow { border-top: 1px solid var(--line); padding-block: 38px; }
 .generation-flow > ul { display: grid; grid-template-columns: 1fr 1fr 1fr .85fr; gap: 48px; list-style: none; margin: 0; padding: 0; }
 .generation-flow li { position: relative; }
-.generation-flow li:nth-child(-n+2)::after { content: ""; position: absolute; right: -25px; top: 41px; width: 20px; height: 20px; background: url("/icons/chevron-right.svg") center / contain no-repeat; filter: invert(.7); }
+.generation-flow li:nth-child(-n+2)::after { content: ""; position: absolute; right: -25px; top: 41px; width: 20px; height: 20px; background: url("icons/chevron-right.svg") center / contain no-repeat; filter: invert(.7); }
 .step-index { color: var(--accent); font: 12px/1.5 var(--mono); }
 .generation-flow p { margin: 0; color: var(--muted); font-size: 17px; line-height: 1.6; max-width: 280px; }
 .generation-flow h2 { font-size: 26px; line-height: 1.3; letter-spacing: -.5px; font-weight: 550; margin: 8px 0 9px; }
 .generation-flow li:last-child { padding-left: 36px; border-left: 1px solid var(--line); }
 .generation-flow li:last-child > p { font-size: 16px; }
 .flow-link { display: flex; align-items: center; justify-content: space-between; gap: 8px; color: var(--accent); margin: 6px 0 10px; white-space: nowrap; }
-.flow-link::after { content: ""; width: 18px; height: 18px; background: currentColor; mask: url("/icons/arrow-right.svg") center / contain no-repeat; }
+.flow-link::after { content: ""; width: 18px; height: 18px; background: currentColor; mask: url("icons/arrow-right.svg") center / contain no-repeat; }
 .canopy-roots { position: absolute; width: 100%; object-fit: cover; z-index: -1; pointer-events: none; }
 .canopy-roots { inset: auto 0 0; height: 330px; object-position: center bottom; mask-image: linear-gradient(transparent, black 30%); }
 .playground-intro { display: flex; justify-content: space-between; align-items: end; gap: 30px; padding-block: 48px 32px; }

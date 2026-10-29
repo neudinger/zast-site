@@ -63,6 +63,17 @@ pub fn localPath(allocator: std.mem.Allocator, path: []const u8) ![]const u8 {
     return std.mem.join(allocator, "/", parts.items);
 }
 
+/// Normalize a URL path and remove its exact deployment prefix before disk lookup.
+/// prefix is a normalized relative path; URLs outside it fail validation.
+pub fn sitePath(allocator: std.mem.Allocator, path: []const u8, prefix: []const u8) ![]const u8 {
+    const normalized = try localPath(allocator, try decode(allocator, path));
+    if (prefix.len == 0) return normalized;
+    if (std.mem.eql(u8, normalized, prefix)) return "";
+    if (!std.mem.startsWith(u8, normalized, prefix) or normalized[prefix.len] != '/')
+        return error.MissingLocalReference;
+    return normalized[prefix.len + 1 ..];
+}
+
 fn requireApiAsset(io: std.Io, path: []const u8) !void {
     const stat = std.Io.Dir.cwd().statFile(io, path, .{}) catch return error.MissingApiAsset;
     if (stat.kind != .file or stat.size == 0) return error.MissingApiAsset;
@@ -94,18 +105,31 @@ pub fn validate(allocator: std.mem.Allocator, io: std.Io, directory: []const u8)
         }
         try pages.put(allocator, relative, page);
     }
+    // Zine prefixes this build-asset URL; reuse it without parsing a second config.
+    const homepage = pages.get("index.html") orelse return error.MissingHomePage;
+    var wasm_urls = attributes(homepage.html, "data-wasm");
+    const wasm_url = wasm_urls.next() orelse "/playground.wasm";
+    if (!std.mem.startsWith(u8, wasm_url, "/") or
+        std.mem.startsWith(u8, wasm_url, "//") or
+        !std.mem.endsWith(u8, wasm_url, "/playground.wasm")) return error.InvalidSiteRoot;
+    const site_root = wasm_url[0 .. wasm_url.len - "playground.wasm".len];
+    const prefix = try localPath(allocator, try decode(allocator, site_root));
     var result: Result = .{ .pages = pages.count() };
     for (pages.keys(), pages.values()) |relative, page| {
-        const base = try std.Uri.parse(try std.fmt.allocPrint(allocator, "https://site.invalid/{s}", .{relative}));
+        const base = try std.Uri.parse(try std.fmt.allocPrint(
+            allocator,
+            "https://site.invalid{s}{s}",
+            .{ site_root, relative },
+        ));
         inline for (.{ "href", "src" }) |attribute| {
             var references = attributes(page.html, attribute);
             while (references.next()) |reference| {
                 const unescaped = try files.replace(allocator, reference, "&amp;", "&");
-                var buffer = try allocator.alloc(u8, unescaped.len * 2 + relative.len + 256);
+                var buffer = try allocator.alloc(u8, unescaped.len * 2 + relative.len + site_root.len + 256);
                 @memcpy(buffer[0..unescaped.len], unescaped);
                 const uri = try std.Uri.resolveInPlace(base, unescaped.len, &buffer);
                 if (!std.ascii.eqlIgnoreCase(uri.scheme, "https") or uri.host == null or !std.ascii.eqlIgnoreCase(try uri.host.?.toRawMaybeAlloc(allocator), "site.invalid") or (uri.port != null and uri.port.? != 443)) continue;
-                var target = try localPath(allocator, try decode(allocator, uri.path.percent_encoded));
+                var target = try sitePath(allocator, uri.path.percent_encoded, prefix);
                 var target_path = try std.fs.path.join(allocator, &.{ directory, target });
                 const stat = std.Io.Dir.cwd().statFile(io, target_path, .{}) catch return error.MissingLocalReference;
                 if (stat.kind == .directory) {
@@ -166,7 +190,9 @@ pub fn arguments(allocator: std.mem.Allocator, io: std.Io, options: Options, out
     try command.append(allocator, try std.fs.path.resolve(allocator, &.{options.zine_executable}));
     if (output) |directory| {
         try command.appendSlice(allocator, &.{ "release", try std.fmt.allocPrint(allocator, "--output={s}", .{directory}) });
-    } else try command.appendSlice(allocator, &.{ "--host=127.0.0.1", "--port=1990" });
+    } else try command.appendSlice(allocator, &.{
+        "--host=127.0.0.1", "--port=1990", "--url-path-prefix=",
+    });
     try addAsset(allocator, &command, base, "playground", options.wasm_file, "playground.wasm");
     for (api.assets) |asset| try addAsset(allocator, &command, base, asset.name, try std.fs.path.join(allocator, &.{ options.api_directory, asset.file }), asset.install);
     return command.toOwnedSlice(allocator);

@@ -3,6 +3,7 @@ import { catalog, examples, buildApiSource, exampleInfo } from "./examples.js";
 import { Rotation } from "./rotation.js";
 import { AstTree, tokenLines } from "./tree.js";
 
+const siteRoot = new URL("./", import.meta.url);
 const compact = document.body.dataset.page === "home";
 
 const elements = Object.fromEntries([
@@ -175,7 +176,7 @@ function updateInputMetadata() {
     elements["json-input"].classList.add("highlighted");
   }
   for (const link of document.querySelectorAll(".open-playground")) {
-    link.href = encoder.encode(readInput()).length <= 4096 ? shareUrl().href : "/examples/";
+    link.href = encoder.encode(readInput()).length <= 4096 ? shareUrl().href : new URL("examples/", siteRoot).href;
   }
 }
 
@@ -239,7 +240,7 @@ function generate() {
     elements["example-description"].textContent = info.description;
     const selected = info.entry;
     if (selected) elements["example-select"].value = selected.id;
-    elements["example-guide"].href = "/docs/examples/#" + (selected?.id || "status");
+    elements["example-guide"].href = new URL("docs/examples/#" + (selected?.id || "status"), siteRoot).href;
     elements["example-position"].textContent = selected ? String(catalog.indexOf(selected) + 1).padStart(2, "0") + " / " + catalog.length : "Custom";
     elements["output-status"].textContent = "Generated locally · " + info.title;
     elements["output-metrics"].textContent = inspection.nodes.length + " nodes · " + duration.toFixed(1) + " ms";
@@ -340,7 +341,7 @@ elements["download-button"].addEventListener("click", () => {
 function shareUrl() {
   const input = encoder.encode(readInput());
   const encoded = btoa(String.fromCharCode(...input)).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
-  const url = new URL("/examples/", window.location.origin);
+  const url = new URL("examples/", siteRoot);
   url.hash = "code=" + encoded;
   return url;
 }

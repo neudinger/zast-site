@@ -129,8 +129,8 @@ pub fn build(allocator: std.mem.Allocator, io: std.Io) !void {
         try guide.writer.print("{s}\n\n", .{entry.title});
         if (entry.description) |description| try guide.writer.print("{s}\n\n", .{description});
         // The pinned Zine resolver treats query strings as part of a page name.
-        // Keep the existing local URLs through SuperMD's validated HTML escape.
-        try guide.writer.print("```=html\n<p><a href=\"/examples/?example={s}\">Try this example</a></p>\n```\n\n", .{entry.id});
+        // Use page-relative URLs so the link also works under a deployment prefix.
+        try guide.writer.print("```=html\n<p><a href=\"../../examples/?example={s}\">Try this example</a></p>\n```\n\n", .{entry.id});
         if (entry.body) |body| {
             try guide.writer.print("**zast interface**\n\n```zig\n{s}```\n\n", .{try files.replace(allocator, body, "output_name", try std.json.Stringify.valueAlloc(allocator, entry.name.?, .{}))});
         } else try guide.writer.print("**Editable input**\n\n```json\n{s}\n```\n\n", .{try json(allocator, entry.input)});

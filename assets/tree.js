@@ -265,13 +265,13 @@ export class AstTree {
     this.path = new Set();
     this.leaf = new Image();
     this.leaf.onload = () => this.draw();
-    this.leaf.src = "/ast-leaf.webp";
+    this.leaf.src = new URL("./ast-leaf.webp", import.meta.url).href;
     this.bark = new Image();
     this.bark.onload = () => this.draw();
-    this.bark.src = "/ast-bark.webp";
+    this.bark.src = new URL("./ast-bark.webp", import.meta.url).href;
     this.roots = new Image();
     this.roots.onload = () => this.draw();
-    this.roots.src = "/ast-roots.webp";
+    this.roots.src = new URL("./ast-roots.webp", import.meta.url).href;
     this.canvas.addEventListener("pointermove", event => {
       const leaf = this.leafAt(event);
       this.canvas.style.cursor = leaf ? "pointer" : "default";

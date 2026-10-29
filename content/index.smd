@@ -38,7 +38,7 @@
     <div class="rotation-controls"><button type="button" id="rotation-button" aria-label="Pause automatic example rotation">Pause</button><span id="rotation-status">Every 12s</span></div>
     <div class="example-navigation" role="group" aria-label="Example navigation">
       <button type="button" id="previous-example-button" aria-label="Previous example" aria-controls="api-output zig-output">Previous</button>
-      <label class="example-picker"><img src="/icons/play.svg" alt="" class="icon"><span class="sr-only">Try an example</span>
+      <label class="example-picker"><img src="icons/play.svg" alt="" class="icon"><span class="sr-only">Try an example</span>
         <select id="example-select" aria-label="Try an example">
           <option value="constant">1. A constant</option>
         </select>
@@ -53,24 +53,24 @@
   <div class="rotation-track" aria-hidden="true"><span id="rotation-progress"></span></div>
   <div class="example-editors editors">
     <section class="editor-pane input-pane" aria-labelledby="input-heading">
-      <div class="pane-toolbar"><div class="file-label"><img src="/icons/file.svg" alt="" class="icon"><h2 id="input-heading">zast interface</h2></div></div>
+      <div class="pane-toolbar"><div class="file-label"><img src="icons/file.svg" alt="" class="icon"><h2 id="input-heading">zast interface</h2></div></div>
       <div class="output-content" tabindex="0" aria-label="Zig API example, read only"><div id="api-output" class="code-output"><div class="code-line"><span class="line-number">1</span><code>Loading the Zig example…</code></div></div></div>
       <div id="input-error" class="input-error" role="alert" hidden></div>
     </section>
     <section class="editor-pane output-pane" aria-label="Generated Zig source">
-      <div class="pane-toolbar"><div class="file-label"><img src="/icons/file.svg" alt="" class="icon"><h2 id="output-filename">Status.zig</h2></div></div>
+      <div class="pane-toolbar"><div class="file-label"><img src="icons/file.svg" alt="" class="icon"><h2 id="output-filename">Status.zig</h2></div></div>
       <div id="panel-zig" class="output-content" tabindex="0" aria-label="Generated Zig source, read only"><div id="zig-output" class="code-output" aria-label="Generated formatted Zig"><div class="code-line"><span class="line-number">1</span><code>Loading the Zig generator…</code></div></div></div>
       <span id="output-status" class="sr-only" role="status" aria-live="off">Preparing WebAssembly…</span><span id="output-metrics" class="sr-only"></span>
     </section>
   </div>
-  <div class="example-context"><span id="example-position">01 / 24</span><p id="example-description">A constant from the zast README.</p><a id="example-guide" href="/docs/examples/#constant">View example <span aria-hidden="true">↗</span></a></div>
+  <div class="example-context"><span id="example-position">01 / 24</span><p id="example-description">A constant from the zast README.</p><a id="example-guide" href="docs/examples/#constant">View example <span aria-hidden="true">↗</span></a></div>
   <div class="example-footer">
     <!-- <p>Runs locally in your browser <span aria-hidden="true">·</span> Zig + WebAssembly</p> -->
     <div class="example-actions">
-      <button type="button" id="copy-button" disabled><img src="/icons/copy.svg" alt="" class="icon"><span data-copy-label>Copy</span></button>
-      <button type="button" id="download-button" disabled><img src="/icons/download.svg" alt="" class="icon">Download</button>
-      <button type="button" id="share-button"><img src="/icons/share.svg" alt="" class="icon">Share</button>
-      <button type="button" id="reset-button"><img src="/icons/rotate-ccw.svg" alt="" class="icon">Reset</button>
+      <button type="button" id="copy-button" disabled><img src="icons/copy.svg" alt="" class="icon"><span data-copy-label>Copy</span></button>
+      <button type="button" id="download-button" disabled><img src="icons/download.svg" alt="" class="icon">Download</button>
+      <button type="button" id="share-button"><img src="icons/share.svg" alt="" class="icon">Share</button>
+      <button type="button" id="reset-button"><img src="icons/rotate-ccw.svg" alt="" class="icon">Reset</button>
     </div>
   </div>
 </section>

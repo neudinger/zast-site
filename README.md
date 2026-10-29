@@ -48,5 +48,4 @@ Generated files: `assets/catalog.js`, `content/docs/examples.smd`,
 
 ## License
 
-[EUPL-1.2](../zast/LICENSE). Third-party asset notices are in
-[assets/licenses/](assets/licenses/); artwork provenance is in [art/](art/).
+[EUPL-1.2](../zast/LICENSE).

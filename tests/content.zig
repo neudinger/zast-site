@@ -192,17 +192,20 @@ test "home and playground retain their distinct controls and example links" {
         try contains(home, try std.fmt.allocPrint(allocator, "id=\"{s}\"", .{identifier}));
     for ([_][]const u8{ "json-input", "input-lines", "input-error", "example-select", "copy-button", "download-button", "share-button", "tab-zig", "tab-api", "tab-ast", "tab-tokens", "panel-zig", "panel-api", "panel-ast", "panel-tokens", "node-rows", "token-rows", "toast" }) |identifier|
         try contains(playground, try std.fmt.allocPrint(allocator, "id=\"{s}\"", .{identifier}));
-    for ([_][]const u8{ "src=\"/playground.js\"", "href=\"/docs/api/\"", "open-playground", "Zig API example, read only" }) |text| try contains(home, text);
+    for ([_][]const u8{ "src=\"/zast-site/playground.js\"", "href=\"/zast-site/docs/api/\"", "open-playground", "Zig API example, read only" }) |text| try contains(home, text);
     for ([_][]const u8{ "id=\"json-input\"", "description.json", "workspace-vines" }) |text| try excludes(home, text);
     for ([_][]const u8{ "rotation-button", "previous-example-button", "next-example-button" }) |identifier|
         try excludes(playground, try std.fmt.allocPrint(allocator, "id=\"{s}\"", .{identifier}));
     try excludes(playground, "workspace-vines");
-    try contains(try site.files.read(allocator, std.testing.io, "dist/docs/index.html"), "href=\"/docs/api/\"");
+    try contains(try site.files.read(allocator, std.testing.io, "dist/docs/index.html"), "href=\"/zast-site/docs/api/\"");
     try std.testing.expectEqual(@as(usize, 24), std.mem.count(u8, guide, ">Try this example</a>"));
     var links = site.website.attributes(guide, "href");
-    while (links.next()) |link| if (std.mem.startsWith(u8, link, "/examples/?example=")) {
+    var example_links: usize = 0;
+    while (links.next()) |link| if (std.mem.startsWith(u8, link, "../../examples/?example=")) {
         try std.testing.expect(!std.mem.endsWith(u8, link, "/"));
+        example_links += 1;
     };
+    try std.testing.expectEqual(@as(usize, 24), example_links);
 }
 
 test "Zine escapes page metadata" {
@@ -242,9 +245,9 @@ test "API transport is lossless and preserves the viewer hooks and shared theme"
     try std.testing.expect(!try site.files.exists(std.testing.io, "dist/docs/api/sources.tar"));
     try contains(try site.files.read(allocator, std.testing.io, "dist/docs/api/main.js"), "new DecompressionStream(\"gzip\")");
     const html = try site.files.read(allocator, std.testing.io, "dist/docs/api/index.html");
-    for ([_][]const u8{ "href=\"sources.tar.gz\"", "href=\"/site.css\"", "href=\"/api.css\"", "class=\"site-header\"", "class=\"site-footer page-width\"", "data-page=\"api\"", "src=\"/site.js\"" }) |text| try contains(html, text);
+    for ([_][]const u8{ "href=\"sources.tar.gz\"", "href=\"/zast-site/site.css\"", "href=\"/zast-site/api.css\"", "class=\"site-header\"", "class=\"site-footer page-width\"", "data-page=\"api\"", "src=\"/zast-site/site.js\"" }) |text| try contains(html, text);
     try excludes(html, "<style");
-    try excludes(html, "src=\"/playground.js\"");
+    try excludes(html, "src=\"/zast-site/playground.js\"");
     const native_html = try site.files.read(allocator, std.testing.io, try std.fs.path.join(allocator, &.{ paths.api_directory, "index.html" }));
     var identifiers = site.website.attributes(native_html, "id");
     while (identifiers.next()) |identifier| if (!std.mem.eql(u8, identifier, "text")) {
@@ -257,11 +260,11 @@ test "broken links and fragments preserve the prior site and clean staging" {
     defer fixture.deinit();
     const article = try fixture.path(fixture.content_directory, "blog/index.smd");
     const original = try site.files.read(fixture.arena.allocator(), std.testing.io, article);
-    try site.files.write(std.testing.io, article, try std.fmt.allocPrint(fixture.arena.allocator(), "{s}\n```=html\n<a href=\"/missing-page/\">Broken</a>\n```\n", .{original}));
+    try site.files.write(std.testing.io, article, try std.fmt.allocPrint(fixture.arena.allocator(), "{s}\n```=html\n<a href=\"/zast-site/missing-page/\">Broken</a>\n```\n", .{original}));
     try fixture.expectFailure(error.MissingLocalReference);
-    try site.files.write(std.testing.io, article, try std.fmt.allocPrint(fixture.arena.allocator(), "{s}\n```=html\n<a href=\"/docs/#missing-heading\">Broken</a>\n```\n", .{original}));
+    try site.files.write(std.testing.io, article, try std.fmt.allocPrint(fixture.arena.allocator(), "{s}\n```=html\n<a href=\"/zast-site/docs/#missing-heading\">Broken</a>\n```\n", .{original}));
     try fixture.expectFailure(error.MissingFragment);
-    try site.files.write(std.testing.io, article, try std.fmt.allocPrint(fixture.arena.allocator(), "{s}\n```=html\n<a href=\"/docs/api/#zast.EnumDeclaration\">Enum</a>\n```\n", .{original}));
+    try site.files.write(std.testing.io, article, try std.fmt.allocPrint(fixture.arena.allocator(), "{s}\n```=html\n<a href=\"/zast-site/docs/api/#zast.EnumDeclaration\">Enum</a>\n```\n", .{original}));
     try std.testing.expectEqual(@as(usize, 8), (try fixture.build()).pages);
     try std.testing.expect(!try site.files.exists(std.testing.io, try fixture.path(fixture.options.output_directory, "stale.html")));
 }
@@ -370,6 +373,26 @@ test "validation rejects ambiguous URLs escaping paths and source symlinks" {
     for ([_][]const u8{ "/%", "/%xx", "/%00", "/%ff", "/%5c.." }) |url|
         try std.testing.expectError(error.InvalidUrl, site.website.decode(allocator, url));
     try std.testing.expectEqualStrings("/docs/?example=enum", try site.website.decode(allocator, "/docs/?example=enum"));
+    for ([_]struct { url: []const u8, prefix: []const u8, relative: []const u8 }{
+        .{ .url = "/zast-site/", .prefix = "zast-site", .relative = "" },
+        .{ .url = "/zast-site/docs/api/", .prefix = "zast-site", .relative = "docs/api" },
+        .{ .url = "/%7aast-site/docs/../icons/file.svg", .prefix = "zast-site", .relative = "icons/file.svg" },
+        .{ .url = "/docs/api/", .prefix = "", .relative = "docs/api" },
+    }) |route| try std.testing.expectEqualStrings(
+        route.relative,
+        try site.website.sitePath(allocator, route.url, route.prefix),
+    );
+    for ([_][]const u8{
+        "/zast-siteevil/docs/", "/docs/", "/zast-site/../outside", "/zast-site/%2e%2e/outside",
+    }) |url| try std.testing.expectError(
+        error.MissingLocalReference,
+        site.website.sitePath(allocator, url, "zast-site"),
+    );
+    try std.testing.expectError(
+        error.PathEscapesRoot,
+        site.website.sitePath(allocator, "/zast-site/../../outside", "zast-site"),
+    );
+
     try temporary.dir.createDir(std.testing.io, "docs", .default_dir);
     try temporary.dir.symLink(std.testing.io, "docs", "alias", .{ .is_directory = true });
     const root = try temporary.dir.realPathFileAlloc(std.testing.io, ".", allocator);
@@ -481,6 +504,9 @@ test "Zine preview serves routes HEAD gzip bytes and concurrent connections" {
     try contains(home, "200 OK");
     try contains(home, "content-type: text/html");
     try contains(home, "/__zine/zinereload.js");
+    try contains(home, "data-wasm=\"/playground.wasm\"");
+    try contains(home, "src=\"/playground.js\"");
+    try excludes(home, "/zast-site/");
     const redirect = try httpRequest(allocator, server.address, "GET", "/docs?example=enum");
     try contains(redirect, "303 See Other");
     try contains(redirect, "location: /docs/?example=enum");
