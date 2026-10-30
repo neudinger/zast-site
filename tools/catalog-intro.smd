@@ -10,9 +10,15 @@
 
 The first 15 groups mirror the local zast copyable example guide. The three
 composed showcases combine those components. Every live output is generated in
-WebAssembly. Recipe JSON selects a compiled generator; it is not arbitrary Zig
-compilation. Edit a recipe's `name` to rename its primary declaration, or edit
-`schema` in the two schema lessons. Enum variations accept complete field lists.
+WebAssembly. Playground JSON describes the declarations, fields, types, values,
+parameters, and statements used to generate both the Zig output and its equivalent
+zast builder. The FlatBuffers lesson reads schema JSON; enum variations accept
+complete field lists. Older `{ "example": "constant", "name": "answer" }` recipes
+remain supported for existing drafts and shared links. This is code generation,
+not arbitrary Zig compilation. In complete descriptions, `example` is an optional
+catalogue label; `declarations` determines the output. Native expression spellings
+are strings, for example `{ "integer_literal": "42" }`; nested type descriptions
+use `enum_type`, `union_type`, `struct_type`, or `function_type`.
 
 The snippets assume `const zast = @import("zast");`, an allocator, and an
 initialized `context: *zast.AstContext` with its root reserved. Borrowed

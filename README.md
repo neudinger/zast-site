@@ -37,7 +37,7 @@ for changes to the library, Wasm sources, or generated example snapshots.
 | [content/](content/) | Authored SuperMD pages, except the generated examples page |
 | [layouts/](layouts/) | Shared SuperHTML page structure |
 | [assets/](assets/) | Styling, browser code, fonts, icons, and artwork |
-| [wasm/](wasm/) | Browser generator and example fixtures |
+| [wasm/](wasm/) | Browser generator and complete JSON example descriptions |
 | [tools/catalog.zig](tools/catalog.zig) | Catalogue entries and guide syncing |
 | [tools/catalog-intro.smd](tools/catalog-intro.smd) | Introduction to the generated examples page |
 | [tools/](tools/) and [build.zig](build.zig) | Site tooling and build graph |

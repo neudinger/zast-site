@@ -204,6 +204,12 @@ async function main() {
     for (const token of result.inspection.tokens) {
       if (token.tag !== "eof") assert(lines[token.index], entry.id + " mapped token " + token.spelling);
     }
+    if (entry.body) {
+      assert.equal(buildApiSource(entry.input, false),
+        "// allocator + initialized context: *zast.AstContext\n" +
+        entry.body.replace(/\boutput_name\b/g, JSON.stringify(entry.name)) + "\n",
+        entry.id + " original homepage builder");
+    }
     if (entry.input.name) {
       const renamed = generate({ ...entry.input, name: "RenamedExample" });
       assert.equal(renamed.status, 0, entry.id + " rename");
@@ -261,6 +267,8 @@ async function main() {
   assert.equal(schemaEdit.status, 0);
   assert(schemaEdit.output.includes("value: u32 = 123"));
 
+  const editedDescriptions = require("./descriptions.cjs").checkDescriptions({ catalog, generate, buildApiSource });
+
   // Warm the largest accepted shape before checking allocator reuse. Wasm memory
   // cannot shrink; repeated generation must stop requesting additional pages.
   const largest = { name: "Stress", backing_type: "i32", fields: thirtyTwoFields.map((field, index) => ({ ...field, value: -100 + index })) };
@@ -305,8 +313,35 @@ async function main() {
       "generic-storage": 'const Storage = generated.Storage(u16); const values = [_]u16{1,2,3}; const storage: Storage = .{.items=&values}; try std.testing.expectEqualSlices(u16,&values,storage.view());',
     };
     let nativeTests = 'const std = @import("std");\nfn identity(value:u32)u32{return value;}\n';
-    for (const [index, entry] of catalog.entries()) {
-      fs.writeFileSync(path.join(temporaryDirectory, "output-" + entry.id + ".zig"), catalogResults[index].output);
+    const editedSemantic = {
+      constant: 'try std.testing.expectEqual(@as(u16,73),generated.answer);',
+      types: 'try std.testing.expect(generated.OptionalText == ?[]u16);',
+      enum: 'try std.testing.expectEqualStrings("paused",@tagName(generated.Status.paused));',
+      union: 'const value: generated.Payload = .{.floating=2.5}; try std.testing.expectEqual(@as(f64,2.5),value.floating);',
+      function: 'try std.testing.expectEqual(@as(u16,19),generated.identity(19,0));',
+      struct: 'const value: generated.Reading = .{}; try std.testing.expectEqual(@as(u32,7),value.get());',
+      nested: 'const value: generated.Response = .{}; try std.testing.expectEqualStrings("retry",@tagName(value.status));',
+      builtin: 'try std.testing.expectEqual(@as(usize,2),generated.scalar_size);',
+      initializer: 'try std.testing.expect(!generated.options.required);',
+      comments: 'try std.testing.expectEqual(@as(u32,73),generated.answer);',
+      callback: 'const callback: generated.Callback = struct { fn call(value:u16)u16{return value;} }.call; try std.testing.expectEqual(@as(u16,7),callback(7));',
+      blocks: 'generated.noop();',
+      comptime: semantic.comptime,
+      "json-schema": 'try std.testing.expectEqual(@as(u32,99),generated.Reading.answerFunc()); const value: generated.Reading = .{}; try std.testing.expectEqual(@as(u32,123),value.answer);',
+      "flatbuf-json": 'const value: generated.Reading = .{}; try std.testing.expectEqual(@as(u32,22),value.answer); try std.testing.expectEqual(@as(u32,3),value.count); try std.testing.expectEqual(@as(u8,3),@backingInt(generated.Status.Busy));',
+      protocol: semantic.protocol,
+      configuration: 'const value: generated.Configuration = .{}; try std.testing.expectEqualStrings("remote.test",value.hostname()); try std.testing.expectEqual(@as(u16,9090),value.port);',
+      "generic-storage": 'const Storage = generated.Storage(u16); var values = [_]u16{1,2,3}; const storage: Storage = .{.items=&values}; try std.testing.expectEqualSlices(u16,&values,storage.view());',
+    };
+    const builderCases = [
+      ...catalog.map((entry, index) => ({ ...entry, output: catalogResults[index].output, check: semantic[entry.id] })),
+      ...editedDescriptions.map((entry, index) => ({
+        ...entry, id: "edit-" + index + "-" + entry.id,
+        check: index < 24 ? editedSemantic[entry.id] : undefined,
+      })),
+    ];
+    for (const entry of builderCases) {
+      fs.writeFileSync(path.join(temporaryDirectory, "output-" + entry.id + ".zig"), entry.output);
       fs.writeFileSync(path.join(temporaryDirectory, "builder-" + entry.id + ".zig"), buildApiSource(entry.input));
       nativeTests += 'test "catalog ' + entry.id + '" {\n' +
         ' const generated = @import("output-' + entry.id + '.zig");\n' +
@@ -315,7 +350,7 @@ async function main() {
         ' try std.testing.expectEqual(@as(usize,0),parsed.errors.len);\n' +
         ' const actual = try @import("builder-' + entry.id + '.zig").generate(std.testing.allocator); defer std.testing.allocator.free(actual);\n' +
         ' try std.testing.expectEqualStrings(expected,actual);\n' +
-        (semantic[entry.id] || 'std.testing.refAllDecls(generated);') + '\n}\n';
+        (entry.check || 'std.testing.refAllDecls(generated);') + '\n}\n';
     }
     const nativeFile = path.join(temporaryDirectory,"catalog-tests.zig");
     fs.writeFileSync(nativeFile, nativeTests);
@@ -323,7 +358,7 @@ async function main() {
   } finally {
     fs.rmSync(temporaryDirectory, { recursive: true, force: true });
   }
-  console.log(JSON.stringify({ wasmBytes: wasmBytes.length, imports: 0, fixtureCount: fixtures.length, catalogEntries: catalog.length, nativeBuilders: catalog.length, repeatedGenerations: 500, memoryBytes, checks: "exact rendering, strict validation, AST edges/token spans/tree projection, recovery, bounded memory, native semantic compilation" }));
+  console.log(JSON.stringify({ wasmBytes: wasmBytes.length, imports: 0, fixtureCount: fixtures.length, catalogEntries: catalog.length, nativeBuilders: catalog.length + editedDescriptions.length, editedDescriptions: editedDescriptions.length, repeatedGenerations: 500, memoryBytes, checks: "exact rendering, strict validation, AST edges/token spans/tree projection, recovery, bounded memory, native semantic compilation" }));
 }
 
 main().catch(failure => { console.error(failure); process.exitCode = 1; });

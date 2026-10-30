@@ -187,7 +187,7 @@ function readMemory(pointer, length) {
 
 const friendlyErrors = {
   InvalidIdentifier: "Use ordinary Zig identifier names (letters, digits, underscores). Keywords and '_' are not accepted.",
-  TooManyFields: "This playground supports up to 32 enum fields.",
+  TooManyFields: "This enum input format supports up to 32 fields.",
   DuplicateField: "Each enum field needs a unique name.",
   DuplicateValue: "Two fields resolve to the same integer value.",
   UnsupportedBackingType: "Choose u8, u16, u32, i8, i16, or i32 for the backing type.",
@@ -200,7 +200,13 @@ const friendlyErrors = {
   UnsupportedSchema: "These schema lessons accept UByte enums and UInt object fields only.",
   TooManyDeclarations: "Keep schema input to at most 16 declarations.",
   InvalidEnumTag: "The example or schema type is not supported.",
-  MissingField: "An enum needs name and fields; a schema recipe needs its schema object.",
+  MissingField: "Check the required declaration, expression, parameter, or schema fields.",
+  InvalidDeclaration: "Each declaration needs exactly one declaration or function description.",
+  DescriptionTooDeep: "Reduce the nesting of the description.",
+  TooManyItems: "Reduce the number of declarations, fields, or statements.",
+  InvalidToken: "Use one valid Zig token for each identifier or literal spelling.",
+  InvalidLiteral: "Check the Zig integer, quoted string, or character spelling.",
+  DescriptionTooLarge: "Reduce the number of nested descriptions.",
   UnexpectedToken: "Check the JSON syntax and the types of its values.",
   InvalidNumber: "Use integer values that fit the selected backing type.",
   OutOfMemory: "The generator ran out of memory. Reload the page before continuing.",

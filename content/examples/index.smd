@@ -37,7 +37,7 @@
         </div>
       </div>
 
-      <div class="example-context playground-context"><span id="example-position">01 / 24</span><p id="example-description">Select a recipe and edit its JSON input.</p><a id="example-guide" href="../docs/examples/#constant">View example ↗</a></div>
+      <div class="example-context playground-context"><span id="example-position">01 / 24</span><p id="example-description">Select an example and edit its complete JSON description.</p><a id="example-guide" href="../docs/examples/#constant">View example ↗</a></div>
       <div class="code-reading-controls" role="group" aria-label="Code reading preferences">
         <label>Code size <select data-code-size aria-label="Code font size"><option value="">Default</option><option value="14">14px</option><option value="16">16px</option><option value="18">18px</option><option value="20">20px</option><option value="24">24px</option><option value="28">28px</option></select></label>
         <label><input type="checkbox" data-code-wrap>Wrap lines</label>
@@ -65,7 +65,7 @@
 }</textarea>
           </div>
           <div id="input-error" class="input-error" role="alert" hidden></div>
-          <div class="pane-footer"><span id="input-guidance">JSON recipe or enum description · 4 KiB maximum</span><span id="input-size">0 B</span></div>
+          <div class="pane-footer"><span id="input-guidance">Complete JSON description · 4 KiB maximum</span><span id="input-size">0 B</span></div>
         </section>
 
         <section class="editor-pane output-pane" aria-label="Generator output">

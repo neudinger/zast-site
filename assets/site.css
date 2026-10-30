@@ -48,6 +48,7 @@ body[data-page="home"] .primary-nav a { padding-block: 20px; }
 .brand-product { color: var(--muted); font: 14px var(--mono); }
 .primary-nav { display: flex; align-items: center; gap: 52px; margin-left: auto; font-size: 14px; }
 .primary-nav a { position: relative; padding-block: 29px; color: var(--muted); }
+.primary-nav .repository-link { display: inline-flex; align-items: center; gap: 8px; white-space: nowrap; }
 .primary-nav a:hover, .primary-nav .active { color: var(--accent); }
 .primary-nav .active::after { content: ""; position: absolute; height: 1px; background: var(--accent); inset: auto -4px 8px; }
 h1, h2, h3 { color: var(--text); }
@@ -228,7 +229,7 @@ tr.selected td { background: var(--elevated); }
 .site-footer { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; border-top: 1px solid var(--line); padding-block: 25px 35px; color: var(--quiet); font-size: 12px; }
 .footer-brand { color: var(--text); font: 13px var(--mono); }
 .footer-brand span { color: var(--quiet); font-size: 11px; }
-.site-footer > div { display: flex; gap: 12px; }
+.site-footer > div { display: flex; flex-wrap: wrap; gap: 12px; }
 .site-footer a:hover { color: var(--accent); }
 .article-intro { padding-block: 60px 35px; }
 .article-intro h1 { font-size: clamp(38px, 4vw, 62px); letter-spacing: -2px; max-width: 1000px; }
@@ -299,13 +300,15 @@ tr.selected td { background: var(--elevated); }
   .workspace .editors { grid-template-columns: minmax(0, 1fr); }
   .workspace .input-pane { border-right: 0; border-bottom: 1px solid var(--line); }
 }
-@media (max-width: 700px) {
-  .page-width { width: calc(100% - 36px); }
+@media (max-width: 900px) {
   .header-inner { flex-wrap: wrap; gap: 0; padding-top: 16px; }
-  .brand { gap: 14px; }
-  .brand-product { font-size: 11px; }
   .primary-nav { margin: 0; width: 100%; justify-content: space-between; flex-wrap: wrap; gap: 0 16px; }
   .primary-nav a { padding-block: 16px; }
+}
+@media (max-width: 700px) {
+  .page-width { width: calc(100% - 36px); }
+  .brand { gap: 14px; }
+  .brand-product { font-size: 11px; }
   h1 { font-size: clamp(45px, 9.5vw, 66px); letter-spacing: -2.5px; }
   .landing-hero { grid-template-columns: minmax(0, 1fr); padding-block: 8px 24px; }
   .landing-hero > .intro-copy { padding-block: 26px 10px; }

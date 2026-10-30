@@ -1,10 +1,11 @@
-//! Browser-local bridge for bounded enum descriptions and documented recipes.
+//! Browser-local bridge for complete descriptions, schema lessons, and legacy recipes.
 //! Returned pointers remain valid until the next `generate` call.
 const std = @import("std");
 const Ast = std.zig.Ast;
 const zast = @import("zast");
 const GuideExamples = @import("GuideExamples.zig");
 const SchemaExamples = @import("SchemaExamples.zig");
+const Descriptions = @import("Descriptions.zig");
 const Recipe = struct {
     example: []const u8,
     name: ?[]const u8 = null,
@@ -128,7 +129,9 @@ fn render(input: []const u8) !void {
     const parsed = try std.json.parseFromSlice(std.json.Value, allocator, input, .{ .parse_numbers = false });
     var context: zast.AstContext = .{};
     _ = try context.addNode(allocator, .root, 0, undefined);
-    if (parsed.value == .object and parsed.value.object.contains("example")) {
+    if (parsed.value == .object and parsed.value.object.contains("declarations")) {
+        try Descriptions.emit(allocator, &context, parsed.value);
+    } else if (parsed.value == .object and parsed.value.object.contains("example")) {
         const recipe = try std.json.parseFromValue(Recipe, allocator, parsed.value, .{});
         if (recipe.value.name) |name| try validateName(name);
         if (std.meta.stringToEnum(GuideExamples.Kind, recipe.value.example)) |kind| {
@@ -255,7 +258,7 @@ fn inspectChildren(allocator: std.mem.Allocator, children: *std.ArrayList(u32), 
         .anyframe_type => try appendChildValues(allocator, children, data.token_and_node[1]),
         .asm_output => try appendChildValues(allocator, children, data.opt_node_and_token[0]),
         .assign, .shl, .error_union => try appendChildValues(allocator, children, data.node_and_node),
-        // This bridge emits the documented recipes, not arbitrary parsed Zig.
+        // This bridge emits supported descriptions, not arbitrary parsed Zig.
         // A new emitter shape must supply its real children before being shown.
         else => return error.UnsupportedAstNode,
     }

@@ -113,6 +113,7 @@ test "clean removes generated outputs and preserves authored files and caches" {
         "tools/catalog-intro.smd",
         "assets/site.css",
         "wasm/main.zig",
+        "wasm/descriptions.json",
         ".openai/hosting.json",
         ".zig-cache/keep",
         "zig-pkg/keep",
@@ -153,7 +154,7 @@ test "generated pages retain their routes and local references" {
     defer arena.deinit();
     const result = try site.website.validate(arena.allocator(), std.testing.io, "dist");
     try std.testing.expectEqual(@as(usize, 8), result.pages);
-    try std.testing.expectEqual(@as(usize, 149), result.references);
+    try std.testing.expectEqual(@as(usize, 157), result.references);
 
     const allocator = arena.allocator();
     // Dynamic imports and canvas textures must be explicitly published by Zine.
@@ -333,13 +334,20 @@ test "duplicate IDs and extra headings fail validation" {
     try fixture.expectFailure(error.InvalidHeadingCount);
 }
 
-test "catalogue and guide sync retain all recipes and generated Zig" {
+test "catalogue descriptions and guide sync retain all examples and generated Zig" {
     var arena = std.heap.ArenaAllocator.init(std.testing.allocator);
     defer arena.deinit();
     const allocator = arena.allocator();
     const entries = try site.catalog.load(allocator, std.testing.io);
     try std.testing.expectEqual(@as(usize, 24), entries.len);
     for (entries[0..15], 1..) |entry, number| try std.testing.expectEqual(number, entry.number.?);
+    for (entries[0..14]) |entry| {
+        try std.testing.expect(entry.input.object.contains("declarations"));
+        try std.testing.expect(!entry.input.object.contains("name"));
+    }
+    try std.testing.expect(entries[14].input.object.contains("schema"));
+    for (entries[15..18]) |entry|
+        try std.testing.expect(entry.input.object.contains("declarations"));
     // Reconstruct the guide from the generated descriptions, independent of a
     // sibling checkout. Its public sync path uses the same compile operation.
     var guide: std.Io.Writer.Allocating = .init(allocator);

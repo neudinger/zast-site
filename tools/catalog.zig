@@ -1,4 +1,4 @@
-//! Build the browser catalogue from guide snapshots and site fixtures. The build
+//! Build the browser catalogue from guide snapshots and complete JSON descriptions. The build
 //! graph syncs the selected library guide before catalogue generation or Wasm compilation.
 const std = @import("std");
 const files = @import("files.zig");
@@ -63,24 +63,19 @@ const variations = [_]struct {
 
 /// All returned descriptions belong to the caller's arena.
 pub fn load(allocator: std.mem.Allocator, io: std.Io) ![]const Entry {
+    const descriptions = try parse(allocator, try files.read(allocator, io, "wasm/descriptions.json"));
+    if (descriptions != .object) return error.InvalidDescriptions;
     var entries: std.ArrayList(Entry) = .empty;
     try entries.appendSlice(allocator, try std.json.parseFromSliceLeaky([]const Entry, allocator, try files.read(allocator, io, "wasm/guide-catalog.json"), .{}));
+    for (entries.items) |*entry|
+        entry.input = descriptions.object.get(entry.id) orelse return error.MissingDescription;
     try entries.appendSlice(allocator, &.{ .{
         .id = "json-schema",
         .title = "Schema-driven struct",
         .number = 14,
         .group = "README examples",
-        .description = "Edit UInt fields and defaults. This lesson adds answerFunc(), returning 84.",
-        .input = try jsonValue(allocator, .{
-            .example = "json-schema",
-            .schema = .{
-                .enums = &[_]std.json.Value{},
-                .objects = .{.{
-                    .name = "Reading",
-                    .fields = .{.{ .name = "answer", .type = .{ .base_type = "UInt" }, .default_integer = 65 }},
-                }},
-            },
-        }),
+        .description = "Edit the struct fields, defaults, and answerFunc() method in its complete description.",
+        .input = descriptions.object.get("json-schema") orelse return error.MissingDescription,
         .expected = "pub const Reading = struct {\n    answer: u32 = 65,\n    pub fn answerFunc() u32 {\n        return 84;\n    }\n};\n",
     }, .{
         .id = "flatbuf-json",
@@ -110,7 +105,7 @@ pub fn load(allocator: std.mem.Allocator, io: std.Io) ![]const Entry {
             .description = showcase.description,
             .group = "Composed showcases",
             .body = try output.toOwnedSlice(),
-            .input = try jsonValue(allocator, .{ .example = showcase.id, .name = showcase.name }),
+            .input = descriptions.object.get(showcase.id) orelse return error.MissingDescription,
             .expected = try files.read(allocator, io, try std.fmt.allocPrint(allocator, "wasm/showcase/{s}.expected.zig", .{showcase.id})),
         });
     }
@@ -133,7 +128,8 @@ pub fn build(allocator: std.mem.Allocator, io: std.Io) !void {
         try guide.writer.print("```=html\n<p><a href=\"../../examples/?example={s}\">Try this example</a></p>\n```\n\n", .{entry.id});
         if (entry.body) |body| {
             try guide.writer.print("**zast interface**\n\n```zig\n{s}```\n\n", .{try files.replace(allocator, body, "output_name", try std.json.Stringify.valueAlloc(allocator, entry.name.?, .{}))});
-        } else try guide.writer.print("**Editable input**\n\n```json\n{s}\n```\n\n", .{try json(allocator, entry.input)});
+        }
+        try guide.writer.print("**Editable input**\n\n```json\n{s}\n```\n\n", .{try json(allocator, entry.input)});
         if (entry.expected) |expected| try guide.writer.print("**Generated Zig**\n\n```zig\n{s}```\n\n", .{expected});
     }
     try files.write(io, "assets/catalog.js", javascript);

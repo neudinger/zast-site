@@ -22,10 +22,11 @@
       <a href="$site.page('docs/api').link()" class="$page.custom.get('navigation').eql('api').then('active')" aria-current="$site.page('docs/api').isCurrent().then('page', 'false')">API Reference</a>
       <a href="$site.page('blog').link()" class="$page.custom.get('navigation').eql('blog').then('active')" aria-current="$site.page('blog').isCurrent().then('page', 'false')">Blog</a>
       <a href="$site.page('examples').link()" class="$page.custom.get('navigation').eql('examples').then('active')" aria-current="$site.page('examples').isCurrent().then('page', 'false')">Playground</a>
+      <a class="repository-link" href="https://github.com/neudinger/zast/"><img src="$site.asset('icons/github.svg').link()" alt="" class="icon" width="18" height="18">GitHub</a>
     </nav>
   </div></header>
   <main id="site-content"><super></main>
-  <footer class="site-footer page-width"><span class="footer-brand">zast<span> · Zig Abstract Syntax Tree</span></span><div><a href="$site.page('docs').link()">Documentation</a><span>·</span><a href="https://zine-ssg.io/docs/supermd/" target="_blank" rel="noreferrer">Built with SuperMD</a></div></footer>
+  <footer class="site-footer page-width"><span class="footer-brand">zast<span> · Zig Abstract Syntax Tree</span></span><div><a href="$site.page('docs').link()">Documentation</a><span>·</span><a href="https://github.com/neudinger/zast/">Source code</a><span>·</span><a href="https://github.com/neudinger/zast/blob/main/LICENSE">EUPL-1.2</a><span>·</span><a href="https://zine-ssg.io/" target="_blank" rel="noreferrer">Built with Zine</a><span>·</span><a href="https://zine-ssg.io/docs/supermd/" target="_blank" rel="noreferrer">Built with SuperMD</a></div></footer>
   <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
 </body>
 </html>
