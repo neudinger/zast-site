@@ -1,0 +1,53 @@
+---
+.title = "Documentation",
+.description = "Descriptions, syntax trees, and formatted source. Start small and compose the next construct.",
+.date = .date("2026-10-21T00:00:00"),
+.layout = "docs.shtml",
+.custom = .{ .kind = "docs", .navigation = "docs" },
+---
+[]($section.id('start-here'))
+
+# Start here
+
+[Generate your first declaration](/docs/getting-started/) shows a complete,
+testable example, including allocation and cleanup.
+
+[]($section.id('the-parts-you-compose'))
+
+# The parts you compose
+
+| Component | Responsibility |
+| --- | --- |
+| `zast.Expression` | Values, operators, calls, initializers, and type expressions. |
+| `zast.Field` | A borrowed field name with optional type and value expressions. |
+| `zast.Declaration` | A named constant or variable. |
+| `zast.EnumDeclaration`, `zast.UnionDeclaration`, `zast.StructDeclaration` | Container descriptions and their named declarations. |
+| `zast.FunctionDeclaration`, `zast.Block` | Functions and sequences of executable statements. |
+| `zast.AstContext` | Token spellings, token indexes, node links, and extra AST data. |
+
+`emitType()` returns an anonymous type node for another construct to embed.
+`emit()` writes a named declaration and registers it with the enclosing context.
+The descriptions borrow their strings and slices; keep that data alive until
+emission completes.
+
+[]($section.id('containers-and-blocks'))
+
+# Containers and blocks
+
+A container groups members of a type, such as enum fields, struct fields, or
+methods. A block groups executable statements inside braces. They use different
+Zig AST node layouts even though both contain an ordered sequence.
+
+[]($section.id('rendering-and-validation'))
+
+# Rendering and validation
+
+Token spellings preserve names and literal text. Nodes describe relationships.
+Both must agree before the standard-library renderer can produce formatted Zig.
+`context.source.items` is the intermediate token text, not the formatted result.
+
+Finalization connects the root declarations and transfers AST storage. It does
+not parse or type-check the generated program. For a generator project, compare
+rendering with parsed expected source and compile representative output with the
+same Zig version used by the library.
+
