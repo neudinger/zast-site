@@ -12,6 +12,9 @@
 [Generate your first declaration](/docs/getting-started/) shows a complete,
 testable example, including allocation and cleanup.
 
+Browse the [copyable example catalogue](/docs/examples/) for all README examples
+and larger compositions.
+
 []($section.id('the-parts-you-compose'))
 
 # The parts you compose

@@ -17,6 +17,7 @@
 > Generate readable source.
 >
 > [Read the docs]($link.page('docs').attrs('primary-link'))
+> [Copyable examples]($link.page('docs/examples').attrs('secondary-link'))
 
 ~~~=html
 <img class="woodland-illustration" src="woodland-tree.webp" width="1774" height="887" alt="">

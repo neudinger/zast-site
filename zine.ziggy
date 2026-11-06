@@ -11,6 +11,7 @@
         "fonts",
         "icons",
         "licenses",
+        "catalog.js",
         "highlight.js",
         "woodland-tree.webp",
     ],

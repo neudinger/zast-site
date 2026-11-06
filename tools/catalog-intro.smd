@@ -1,0 +1,19 @@
+---
+.title = "Copyable examples — zast",
+.description = "The README examples and larger compositions: zast interfaces beside generated Zig.",
+.layout = "docs.shtml",
+.date = .date("2026-10-22T00:00:00"),
+.custom = .{ .kind = "docs", .navigation = "docs" },
+---
+
+# Reading the examples
+
+These 13 groups mirror the pinned Zast guide. Each entry pairs a Zast
+builder snippet with its generated Zig.
+
+The snippets assume `const zast = @import("zast");`, an allocator, and an
+initialized `context: *zast.AstContext` with its root reserved. Borrowed
+expressions and descriptors remain alive through emission. Finish the context
+once, render with `tree.renderAlloc(allocator)`, and release the tree and its
+separately owned source.
+
