@@ -34,11 +34,19 @@ pub fn build(builder: *Build) void {
     builder.step("sync-examples", "Refresh the guide snapshots").dependOn(&sync.step);
     builder.step("catalog", "Generate the copyable example catalogue").dependOn(&catalog.step);
 
+    const wasm = tools.addCompile(.wasm, &.{&sync.step});
+    const wasm_step = builder.step("wasm", "Build the browser generator and catalogue");
+    wasm_step.dependOn(&wasm.step);
+    wasm_step.dependOn(&catalog.step);
+
     const release = builder.addRunArtifact(zine);
     release.setCwd(builder.path("."));
     release.has_side_effects = true;
     release.addArgs(&.{ "release", "--output=dist", "--force" });
     release.step.dependOn(&catalog.step);
+    release.addArg("--build-asset=playground");
+    release.addFileArg2(wasm.getEmittedBin(), .{});
+    release.addArg("--install-always=playground.wasm");
     builder.getInstallStep().dependOn(&release.step);
 
     const tests = builder.addSystemCommand(&.{ "node", "tests/stage.cjs" });

@@ -1,0 +1,87 @@
+{
+  "objects": [
+    {
+      "name": "Reading",
+      "fields": [
+        {
+          "name": "answer",
+          "type": {
+            "base_type": "UInt",
+            "element_size": 1
+          },
+          "offset": 4,
+          "default_integer": 65
+        }
+      ],
+      "minalign": 1,
+      "declaration_file": "//reading.fbs"
+    }
+  ],
+  "enums": [
+    {
+      "name": "Status",
+      "values": [
+        {
+          "name": "Unknown",
+          "value": 0,
+          "union_type": {
+            "base_size": 1,
+            "element_size": 1
+          }
+        },
+        {
+          "name": "Ok",
+          "value": 1,
+          "union_type": {
+            "base_size": 1,
+            "element_size": 1
+          }
+        },
+        {
+          "name": "Warning",
+          "value": 2,
+          "union_type": {
+            "base_size": 1,
+            "element_size": 1
+          }
+        }
+      ],
+      "underlying_type": {
+        "base_type": "UByte",
+        "index": 0,
+        "base_size": 1,
+        "element_size": 1
+      },
+      "declaration_file": "//reading.fbs"
+    }
+  ],
+  "file_ident": "",
+  "file_ext": "",
+  "root_table": {
+    "name": "Reading",
+    "fields": [
+      {
+        "name": "answer",
+        "type": {
+          "base_type": "UInt",
+          "element_size": 1
+        },
+        "offset": 4,
+        "default_integer": 65
+      }
+    ],
+    "minalign": 1,
+    "declaration_file": "//reading.fbs"
+  },
+  "services": [
+
+  ],
+  "fbs_files": [
+    {
+      "filename": "//reading.fbs",
+      "included_filenames": [
+
+      ]
+    }
+  ]
+}

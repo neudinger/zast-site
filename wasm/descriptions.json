@@ -1,0 +1,895 @@
+{
+  "constant": {
+    "example": "constant",
+    "declarations": [
+      {
+        "name": "answer",
+        "visibility": "public",
+        "declaration": {
+          "type_expression": {
+            "identifier": "u32"
+          },
+          "value": {
+            "integer_literal": "42"
+          }
+        }
+      }
+    ]
+  },
+  "types": {
+    "example": "types",
+    "declarations": [
+      {
+        "name": "OptionalText",
+        "visibility": "public",
+        "declaration": {
+          "value": {
+            "optional_type": {
+              "slice_type": {
+                "child_type": {
+                  "identifier": "u8"
+                },
+                "is_const": true
+              }
+            }
+          }
+        }
+      }
+    ]
+  },
+  "enum": {
+    "example": "enum",
+    "declarations": [
+      {
+        "name": "Status",
+        "visibility": "public",
+        "declaration": {
+          "value": {
+            "enum_type": {
+              "backing_type": null,
+              "non_exhaustive": false,
+              "fields": [
+                {
+                  "name": "unknown"
+                },
+                {
+                  "name": "ok"
+                }
+              ]
+            }
+          }
+        }
+      }
+    ]
+  },
+  "union": {
+    "example": "union",
+    "declarations": [
+      {
+        "name": "Payload",
+        "visibility": "public",
+        "declaration": {
+          "value": {
+            "union_type": {
+              "tag_type": "inferred",
+              "fields": [
+                {
+                  "name": "none"
+                },
+                {
+                  "name": "number",
+                  "type_expression": {
+                    "identifier": "u32"
+                  }
+                },
+                {
+                  "name": "boolean",
+                  "type_expression": {
+                    "identifier": "bool"
+                  }
+                }
+              ]
+            }
+          }
+        }
+      }
+    ]
+  },
+  "function": {
+    "example": "function",
+    "declarations": [
+      {
+        "name": "identity",
+        "visibility": "public",
+        "function": {
+          "parameters": [
+            {
+              "name": "value",
+              "type_expression": {
+                "identifier": "u32"
+              }
+            }
+          ],
+          "return_type": {
+            "identifier": "u32"
+          },
+          "body": {
+            "statements": [
+              {
+                "return_value": {
+                  "identifier": "value"
+                }
+              }
+            ]
+          }
+        }
+      }
+    ]
+  },
+  "struct": {
+    "example": "struct",
+    "declarations": [
+      {
+        "name": "Reading",
+        "visibility": "public",
+        "declaration": {
+          "value": {
+            "struct_type": {
+              "layout": "automatic",
+              "members": [
+                {
+                  "field": {
+                    "name": "value",
+                    "type_expression": {
+                      "identifier": "u32"
+                    },
+                    "value": {
+                      "integer_literal": "42"
+                    }
+                  }
+                },
+                {
+                  "function": {
+                    "name": "get",
+                    "declaration": {
+                      "parameters": [
+                        {
+                          "name": "self",
+                          "type_expression": {
+                            "pointer_type": {
+                              "child_type": {
+                                "builtin_call": {
+                                  "name": "@This",
+                                  "arguments": []
+                                }
+                              },
+                              "is_const": true
+                            }
+                          }
+                        }
+                      ],
+                      "return_type": {
+                        "identifier": "u32"
+                      },
+                      "body": {
+                        "statements": [
+                          {
+                            "return_value": {
+                              "field_access": {
+                                "base": {
+                                  "identifier": "self"
+                                },
+                                "name": "value"
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    "visibility": "public"
+                  }
+                }
+              ]
+            }
+          }
+        }
+      }
+    ]
+  },
+  "nested": {
+    "example": "nested",
+    "declarations": [
+      {
+        "name": "Response",
+        "visibility": "public",
+        "declaration": {
+          "value": {
+            "struct_type": {
+              "layout": "automatic",
+              "members": [
+                {
+                  "field": {
+                    "name": "status",
+                    "type_expression": {
+                      "enum_type": {
+                        "backing_type": null,
+                        "non_exhaustive": false,
+                        "fields": [
+                          {
+                            "name": "unknown"
+                          },
+                          {
+                            "name": "ok"
+                          }
+                        ]
+                      }
+                    },
+                    "value": {
+                      "enum_literal": "unknown"
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      }
+    ]
+  },
+  "builtin": {
+    "example": "builtin",
+    "declarations": [
+      {
+        "name": "scalar_size",
+        "visibility": "public",
+        "declaration": {
+          "value": {
+            "builtin_call": {
+              "name": "@sizeOf",
+              "arguments": [
+                {
+                  "identifier": "u32"
+                }
+              ]
+            }
+          }
+        }
+      }
+    ]
+  },
+  "initializer": {
+    "example": "initializer",
+    "declarations": [
+      {
+        "name": "options",
+        "visibility": "public",
+        "declaration": {
+          "value": {
+            "struct_init": {
+              "fields": [
+                {
+                  "name": "required",
+                  "value": {
+                    "identifier": "true"
+                  }
+                },
+                {
+                  "name": "status",
+                  "value": {
+                    "enum_literal": "unknown"
+                  }
+                }
+              ],
+              "trailing_comma": true
+            }
+          }
+        }
+      }
+    ]
+  },
+  "comments": {
+    "example": "comments",
+    "comment": "Generated by zast.",
+    "container_doc_comment": "Documented declarations.",
+    "declarations": [
+      {
+        "name": "answer",
+        "visibility": "public",
+        "declaration": {
+          "type_expression": {
+            "identifier": "u32"
+          },
+          "value": {
+            "integer_literal": "42"
+          }
+        },
+        "doc_comment": "The default answer."
+      }
+    ]
+  },
+  "callback": {
+    "example": "callback",
+    "declarations": [
+      {
+        "name": "Callback",
+        "visibility": "public",
+        "declaration": {
+          "value": {
+            "pointer_type": {
+              "child_type": {
+                "function_type": {
+                  "parameters": [
+                    {
+                      "type_expression": {
+                        "identifier": "u32"
+                      }
+                    }
+                  ],
+                  "return_type": {
+                    "identifier": "u32"
+                  },
+                  "body": {
+                    "statements": []
+                  }
+                }
+              },
+              "is_const": true
+            }
+          }
+        }
+      }
+    ]
+  },
+  "blocks": {
+    "example": "blocks",
+    "declarations": [
+      {
+        "name": "noop",
+        "visibility": "public",
+        "function": {
+          "parameters": [],
+          "return_type": {
+            "identifier": "void"
+          },
+          "body": {
+            "statements": [
+              {
+                "block": {
+                  "statements": [
+                    {
+                      "declaration": {
+                        "name": "value",
+                        "declaration": {
+                          "value": {
+                            "integer_literal": "42"
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "assignment": {
+                        "target": {
+                          "identifier": "_"
+                        },
+                        "value": {
+                          "identifier": "value"
+                        }
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                "return_value": null
+              }
+            ]
+          }
+        }
+      }
+    ]
+  },
+  "comptime": {
+    "example": "comptime",
+    "declarations": [
+      {
+        "name": "forward",
+        "visibility": "public",
+        "function": {
+          "parameters": [
+            {
+              "name": "Value",
+              "type_expression": {
+                "identifier": "type"
+              },
+              "is_comptime": true
+            },
+            {
+              "name": "value",
+              "type_expression": {
+                "error_union_type": {
+                  "error_set": {
+                    "identifier": "anyerror"
+                  },
+                  "payload_type": {
+                    "identifier": "Value"
+                  }
+                }
+              }
+            }
+          ],
+          "return_type": {
+            "error_union_type": {
+              "error_set": {
+                "identifier": "anyerror"
+              },
+              "payload_type": {
+                "identifier": "Value"
+              }
+            }
+          },
+          "body": {
+            "statements": [
+              {
+                "declaration": {
+                  "name": "result",
+                  "declaration": {
+                    "kind": "variable",
+                    "type_expression": {
+                      "identifier": "Value"
+                    },
+                    "value": {
+                      "identifier": "undefined"
+                    }
+                  }
+                }
+              },
+              {
+                "assignment": {
+                  "target": {
+                    "identifier": "result"
+                  },
+                  "value": {
+                    "try": {
+                      "identifier": "value"
+                    }
+                  }
+                }
+              },
+              {
+                "return_value": {
+                  "identifier": "result"
+                }
+              }
+            ]
+          }
+        }
+      }
+    ]
+  },
+  "json-schema": {
+    "example": "json-schema",
+    "declarations": [
+      {
+        "name": "Reading",
+        "visibility": "public",
+        "declaration": {
+          "value": {
+            "struct_type": {
+              "layout": "automatic",
+              "members": [
+                {
+                  "field": {
+                    "name": "answer",
+                    "type_expression": {
+                      "identifier": "u32"
+                    },
+                    "value": {
+                      "integer_literal": "65"
+                    }
+                  }
+                },
+                {
+                  "function": {
+                    "name": "answerFunc",
+                    "declaration": {
+                      "parameters": [],
+                      "return_type": {
+                        "identifier": "u32"
+                      },
+                      "body": {
+                        "statements": [
+                          {
+                            "return_value": {
+                              "integer_literal": "84"
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    "visibility": "public"
+                  }
+                }
+              ]
+            }
+          }
+        }
+      }
+    ]
+  },
+  "protocol": {
+    "example": "protocol",
+    "declarations": [
+      {
+        "name": "Operation",
+        "visibility": "public",
+        "declaration": {
+          "value": {
+            "enum_type": {
+              "backing_type": "u8",
+              "non_exhaustive": false,
+              "fields": [
+                {
+                  "name": "ping"
+                },
+                {
+                  "name": "data"
+                }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "name": "Flags",
+        "visibility": "public",
+        "declaration": {
+          "value": {
+            "struct_type": {
+              "layout": "packed",
+              "members": [
+                {
+                  "field": {
+                    "name": "urgent",
+                    "type_expression": {
+                      "identifier": "bool"
+                    },
+                    "value": {
+                      "identifier": "false"
+                    }
+                  }
+                },
+                {
+                  "field": {
+                    "name": "encrypted",
+                    "type_expression": {
+                      "identifier": "bool"
+                    },
+                    "value": {
+                      "identifier": "false"
+                    }
+                  }
+                },
+                {
+                  "field": {
+                    "name": "reserved",
+                    "type_expression": {
+                      "identifier": "u6"
+                    },
+                    "value": {
+                      "integer_literal": "0"
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "name": "Payload",
+        "visibility": "public",
+        "declaration": {
+          "value": {
+            "union_type": {
+              "tag_type": {
+                "enum_type": {
+                  "identifier": "Operation"
+                }
+              },
+              "fields": [
+                {
+                  "name": "ping",
+                  "type_expression": {
+                    "identifier": "void"
+                  }
+                },
+                {
+                  "name": "data",
+                  "type_expression": {
+                    "slice_type": {
+                      "child_type": {
+                        "identifier": "u8"
+                      },
+                      "is_const": true
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "name": "Packet",
+        "visibility": "public",
+        "declaration": {
+          "value": {
+            "struct_type": {
+              "layout": "automatic",
+              "members": [
+                {
+                  "field": {
+                    "name": "sequence",
+                    "type_expression": {
+                      "identifier": "u32"
+                    }
+                  }
+                },
+                {
+                  "field": {
+                    "name": "flags",
+                    "type_expression": {
+                      "identifier": "Flags"
+                    },
+                    "value": {
+                      "struct_init": {
+                        "fields": []
+                      }
+                    }
+                  }
+                },
+                {
+                  "field": {
+                    "name": "payload",
+                    "type_expression": {
+                      "identifier": "Payload"
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      }
+    ]
+  },
+  "configuration": {
+    "example": "configuration",
+    "declarations": [
+      {
+        "name": "Configuration",
+        "visibility": "public",
+        "declaration": {
+          "value": {
+            "struct_type": {
+              "layout": "automatic",
+              "members": [
+                {
+                  "field": {
+                    "name": "host",
+                    "type_expression": {
+                      "slice_type": {
+                        "child_type": {
+                          "identifier": "u8"
+                        },
+                        "is_const": true
+                      }
+                    },
+                    "value": {
+                      "string_literal": "\"localhost\""
+                    }
+                  }
+                },
+                {
+                  "field": {
+                    "name": "port",
+                    "type_expression": {
+                      "identifier": "u16"
+                    },
+                    "value": {
+                      "integer_literal": "8080"
+                    }
+                  }
+                },
+                {
+                  "field": {
+                    "name": "log_level",
+                    "type_expression": {
+                      "enum_type": {
+                        "backing_type": null,
+                        "non_exhaustive": false,
+                        "fields": [
+                          {
+                            "name": "quiet"
+                          },
+                          {
+                            "name": "info"
+                          },
+                          {
+                            "name": "debug"
+                          }
+                        ]
+                      }
+                    },
+                    "value": {
+                      "enum_literal": "info"
+                    }
+                  }
+                },
+                {
+                  "field": {
+                    "name": "token",
+                    "type_expression": {
+                      "optional_type": {
+                        "slice_type": {
+                          "child_type": {
+                            "identifier": "u8"
+                          },
+                          "is_const": true
+                        }
+                      }
+                    },
+                    "value": {
+                      "identifier": "null"
+                    }
+                  }
+                },
+                {
+                  "function": {
+                    "name": "hostname",
+                    "declaration": {
+                      "parameters": [
+                        {
+                          "name": "self",
+                          "type_expression": {
+                            "pointer_type": {
+                              "child_type": {
+                                "builtin_call": {
+                                  "name": "@This",
+                                  "arguments": []
+                                }
+                              },
+                              "is_const": true
+                            }
+                          }
+                        }
+                      ],
+                      "return_type": {
+                        "slice_type": {
+                          "child_type": {
+                            "identifier": "u8"
+                          },
+                          "is_const": true
+                        }
+                      },
+                      "body": {
+                        "statements": [
+                          {
+                            "return_value": {
+                              "field_access": {
+                                "base": {
+                                  "identifier": "self"
+                                },
+                                "name": "host"
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    "visibility": "public"
+                  }
+                }
+              ]
+            }
+          }
+        }
+      }
+    ]
+  },
+  "generic-storage": {
+    "example": "generic-storage",
+    "declarations": [
+      {
+        "name": "Storage",
+        "visibility": "public",
+        "function": {
+          "parameters": [
+            {
+              "name": "Item",
+              "type_expression": {
+                "identifier": "type"
+              },
+              "is_comptime": true
+            }
+          ],
+          "return_type": {
+            "identifier": "type"
+          },
+          "body": {
+            "statements": [
+              {
+                "return_value": {
+                  "struct_type": {
+                    "layout": "automatic",
+                    "members": [
+                      {
+                        "field": {
+                          "name": "items",
+                          "type_expression": {
+                            "slice_type": {
+                              "child_type": {
+                                "identifier": "Item"
+                              },
+                              "is_const": true
+                            }
+                          }
+                        }
+                      },
+                      {
+                        "function": {
+                          "name": "view",
+                          "declaration": {
+                            "parameters": [
+                              {
+                                "name": "self",
+                                "type_expression": {
+                                  "pointer_type": {
+                                    "child_type": {
+                                      "builtin_call": {
+                                        "name": "@This",
+                                        "arguments": []
+                                      }
+                                    },
+                                    "is_const": true
+                                  }
+                                }
+                              }
+                            ],
+                            "return_type": {
+                              "slice_type": {
+                                "child_type": {
+                                  "identifier": "Item"
+                                },
+                                "is_const": true
+                              }
+                            },
+                            "body": {
+                              "statements": [
+                                {
+                                  "return_value": {
+                                    "field_access": {
+                                      "base": {
+                                        "identifier": "self"
+                                      },
+                                      "name": "items"
+                                    }
+                                  }
+                                }
+                              ]
+                            }
+                          },
+                          "visibility": "public"
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    ]
+  }
+}

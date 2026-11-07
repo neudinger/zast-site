@@ -1,4 +1,5 @@
-//! Build the copyable example catalogue from the pinned library guide.
+//! Build the browser catalogue from guide snapshots and complete JSON descriptions. The build
+//! graph syncs the selected library guide before catalogue generation or Wasm compilation.
 const std = @import("std");
 const files = @import("files.zig");
 
@@ -26,10 +27,90 @@ fn jsonValue(allocator: std.mem.Allocator, value: anytype) !std.json.Value {
     return parse(allocator, try json(allocator, value));
 }
 
-/// Load the curated examples produced by guide synchronization.
+const variations = [_]struct {
+    id: []const u8,
+    title: []const u8,
+    input: struct {
+        name: []const u8,
+        backing_type: ?[]const u8 = null,
+        non_exhaustive: ?bool = null,
+        fields: []const struct { name: []const u8, value: ?i64 = null } = &.{},
+    },
+}{
+    .{ .id = "basic", .title = "Simple numeric enum", .input = .{
+        .name = "Status",
+        .backing_type = "u8",
+        .fields = &.{ .{ .name = "unknown", .value = 0 }, .{ .name = "ok", .value = 1 } },
+    } },
+    .{ .id = "status", .title = "Explicit enum and catch-all", .input = .{
+        .name = "Status",
+        .backing_type = "u8",
+        .non_exhaustive = true,
+        .fields = &.{ .{ .name = "unknown", .value = 0 }, .{ .name = "ok", .value = 1 }, .{ .name = "warning", .value = 2 } },
+    } },
+    .{ .id = "inferred", .title = "Directions enum", .input = .{
+        .name = "Direction",
+        .fields = &.{ .{ .name = "north" }, .{ .name = "east" }, .{ .name = "south" }, .{ .name = "west" } },
+    } },
+    .{ .id = "signed", .title = "Signed enum values", .input = .{
+        .name = "Signal",
+        .backing_type = "i16",
+        .fields = &.{ .{ .name = "negative", .value = -1 }, .{ .name = "quiet", .value = 0 }, .{ .name = "positive", .value = 1 } },
+    } },
+    .{ .id = "offset", .title = "Non-exhaustive offset", .input = .{ .name = "Offset", .backing_type = "u32", .non_exhaustive = true } },
+    .{ .id = "empty", .title = "Empty enum", .input = .{ .name = "Empty" } },
+};
+
+/// All returned descriptions belong to the caller's arena.
 pub fn load(allocator: std.mem.Allocator, io: std.Io) ![]const Entry {
-    const snapshot = try files.read(allocator, io, "wasm/guide-catalog.json");
-    return std.json.parseFromSliceLeaky([]const Entry, allocator, snapshot, .{});
+    const descriptions = try parse(allocator, try files.read(allocator, io, "wasm/descriptions.json"));
+    if (descriptions != .object) return error.InvalidDescriptions;
+    var entries: std.ArrayList(Entry) = .empty;
+    try entries.appendSlice(allocator, try std.json.parseFromSliceLeaky([]const Entry, allocator, try files.read(allocator, io, "wasm/guide-catalog.json"), .{}));
+    for (entries.items) |*entry|
+        entry.input = descriptions.object.get(entry.id) orelse return error.MissingDescription;
+    try entries.appendSlice(allocator, &.{ .{
+        .id = "json-schema",
+        .title = "Schema-driven struct",
+        .number = 14,
+        .group = "README examples",
+        .description = "Edit the struct fields, defaults, and answerFunc() method in its complete description.",
+        .input = descriptions.object.get("json-schema") orelse return error.MissingDescription,
+        .expected = "pub const Reading = struct {\n    answer: u32 = 65,\n    pub fn answerFunc() u32 {\n        return 84;\n    }\n};\n",
+    }, .{
+        .id = "flatbuf-json",
+        .title = "FlatBuffers JSON",
+        .number = 15,
+        .group = "README examples",
+        .description = "A small schema lesson: UByte enums and UInt fields become ordinary Zig declarations.",
+        .input = try parse(allocator, try std.fmt.allocPrint(allocator, "{{\"example\":\"flatbuf-json\",\"schema\":{s}}}", .{try files.read(allocator, io, "wasm/fixtures/reading.json")})),
+        .expected = try files.read(allocator, io, "wasm/fixtures/reading.expected.zig"),
+    } });
+    const showcases = [_]struct { id: []const u8, title: []const u8, name: []const u8, description: []const u8 }{
+        .{ .id = "protocol", .title = "Protocol model", .name = "Packet", .description = "Compose a named enum, packed flags, a tagged union, and a packet struct. Native Zig layout is not a wire serializer." },
+        .{ .id = "configuration", .title = "Application configuration", .name = "Configuration", .description = "Combine defaults, optional strings, an anonymous enum, and a receiver method." },
+        .{ .id = "generic-storage", .title = "Generic storage factory", .name = "Storage", .description = "Generate a comptime type factory returning a struct with a borrowed slice and method." },
+    };
+    for (showcases) |showcase| {
+        const source = try files.read(allocator, io, try std.fmt.allocPrint(allocator, "wasm/showcase/{s}.zig", .{showcase.id}));
+        const start = (std.mem.indexOf(u8, source, "!void {\n") orelse return error.MissingShowcaseBody) + 8;
+        const end = std.mem.lastIndexOfScalar(u8, source, '}') orelse return error.MissingShowcaseBody;
+        var output: std.Io.Writer.Allocating = .init(allocator);
+        var lines = std.mem.splitScalar(u8, std.mem.trimEnd(u8, source[start..end], " \n\r\t"), '\n');
+        while (lines.next()) |line| try output.writer.print("{s}\n", .{if (std.mem.startsWith(u8, line, "    ")) line[4..] else line});
+        try entries.append(allocator, .{
+            .id = showcase.id,
+            .title = showcase.title,
+            .name = showcase.name,
+            .description = showcase.description,
+            .group = "Composed showcases",
+            .body = try output.toOwnedSlice(),
+            .input = descriptions.object.get(showcase.id) orelse return error.MissingDescription,
+            .expected = try files.read(allocator, io, try std.fmt.allocPrint(allocator, "wasm/showcase/{s}.expected.zig", .{showcase.id})),
+        });
+    }
+    for (variations) |variation| try entries.append(allocator, .{ .id = variation.id, .title = variation.title, .group = "Enum variations", .input = try jsonValue(allocator, variation.input) });
+    return entries.toOwnedSlice(allocator);
 }
 
 pub fn build(allocator: std.mem.Allocator, io: std.Io) !void {
@@ -45,6 +126,10 @@ pub fn build(allocator: std.mem.Allocator, io: std.Io) !void {
         if (entry.body) |body| {
             try guide.writer.print("**zast interface**\n\n```zig\n{s}```\n\n", .{try files.replace(allocator, body, "output_name", try std.json.Stringify.valueAlloc(allocator, entry.name.?, .{}))});
         }
+        try guide.writer.print(
+            "**Equivalent AST (JSON)**\n\n```json\n{s}\n```\n\n",
+            .{try json(allocator, entry.input)},
+        );
         if (entry.expected) |expected| try guide.writer.print("**Generated Zig**\n\n```zig\n{s}```\n\n", .{expected});
     }
     try files.write(io, "assets/catalog.js", javascript);

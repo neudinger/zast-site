@@ -1,4 +1,5 @@
 //! Build adapter for native commands and library artifacts.
+//! These methods declare steps. Wasm compilation consumes Zast's exported module.
 //! The graph owns its references and library paths; no deinit is needed. Named commands and
 //! dependency lists stay in build.zig; addRun() schedules rather than executes work.
 const std = @import("std");
@@ -56,4 +57,53 @@ pub fn addRun(self: Self, command: Command, dependencies: []const *Step) *Step.R
     }
     for (dependencies) |dependency| step.step.dependOn(dependency);
     return step;
+}
+
+// Library artifact steps.
+
+/// Declare the Wasm browser generator with its fixed target, exports, and memory limits.
+pub fn addCompile(
+    self: Self,
+    compilation_target: enum { wasm },
+    dependencies: []const *Step,
+) *Step.Compile {
+    const builder = self.builder;
+    const artifact = switch (compilation_target) {
+        .wasm => wasm_blk: {
+            const wasm_target = builder.resolveTargetQuery(.{
+                .cpu_arch = .wasm32,
+                .os_tag = .freestanding,
+            });
+            const zast = builder.dependency("zast", .{
+                .target = wasm_target,
+                .optimize = .ReleaseSmall,
+            });
+            const wasm_module = builder.createModule(.{
+                .root_source_file = builder.path("wasm/main.zig"),
+                .target = wasm_target,
+                .optimize = .ReleaseSmall,
+                .imports = &.{.{ .name = "zast", .module = zast.module("zast") }},
+            });
+            wasm_module.export_symbol_names = &.{
+                "inputPointer",
+                "inputCapacity",
+                "generate",
+                "outputPointer",
+                "outputLength",
+                "inspectPointer",
+                "inspectLength",
+            };
+            const executable = builder.addExecutable(.{
+                .name = "playground",
+                .root_module = wasm_module,
+            });
+            executable.entry = .disabled;
+            executable.export_memory = true;
+            executable.stack_size = 1024 * 1024;
+            executable.max_memory = 16 * 1024 * 1024;
+            break :wasm_blk executable;
+        },
+    };
+    for (dependencies) |dependency| artifact.step.dependOn(dependency);
+    return artifact;
 }

@@ -12,6 +12,7 @@
         "icons",
         "licenses",
         "catalog.js",
+        "examples.js",
         "highlight.js",
         "woodland-tree.webp",
     ],

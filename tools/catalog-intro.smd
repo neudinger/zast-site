@@ -8,8 +8,9 @@
 
 # Reading the examples
 
-These 13 groups mirror the pinned Zast guide. Each entry pairs a Zast
-builder snippet with its generated Zig.
+The first 15 groups cover the Zast README examples, followed by
+composed showcases and enum variations. The Wasm generator turns the
+example descriptions into Zig and exposes the resulting AST.
 
 The snippets assume `const zast = @import("zast");`, an allocator, and an
 initialized `context: *zast.AstContext` with its root reserved. Borrowed
