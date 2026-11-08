@@ -10,7 +10,9 @@
 # Start here
 
 [Generate your first declaration](/docs/getting-started/) shows a complete,
-testable example, including allocation and cleanup.
+testable example, including allocation and cleanup. Then use the
+[playground](/examples/) to inspect how changing a description changes the
+source, tokens, and nodes.
 
 Browse the [copyable example catalogue](/docs/examples/) for all README examples
 and larger compositions.

@@ -4,6 +4,7 @@ Presentation website and documentation for [zast](https://github.com/neudinger/z
 Built with Zine, SuperMD, and shared SuperHTML layouts.
 The example catalogue is generated from the pinned Zast guide.
 The generator compiles JSON descriptions to Zig and AST data in WebAssembly.
+The homepage viewer and playground run the generator locally in the browser.
 
 ## Requirements
 

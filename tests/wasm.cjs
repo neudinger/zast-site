@@ -9,9 +9,19 @@ async function main() {
   assert(libraryRoot, "Run this suite with zig build test");
   const librarySource = path.join(libraryRoot, "src", "root.zig");
   const siteDirectory = path.resolve(__dirname, "..");
+  await require("./rotation.cjs").checkRotation();
+  await require("./tree.cjs").checkTree();
+  await require("./reading.cjs").checkReading();
+  const { layoutTree, tokenLines, initialBranches, branchView, nodePath } = await import("../assets/tree.js");
   const { catalog, buildApiSource } = await import("../assets/examples.js");
   assert.equal(catalog.length, 24);
   assert.deepEqual(catalog.filter(entry => entry.number).map(entry => entry.number), Array.from({length:15}, (_, index) => index + 1));
+  const { highlightJson } = await import("../assets/highlight.js");
+  const highlighted = highlightJson('{"name":"<script>alert(1)</script>","value":-2,"ready":true}');
+  assert(!highlighted.includes("<script>"));
+  assert(highlighted.includes("&lt;script&gt;"));
+  assert(highlighted.includes('class="syntax-number">-2</span>'));
+  assert(highlighted.includes('class="syntax-number">true</span>'));
   const wasmBytes = fs.readFileSync(path.join(siteDirectory, "dist/playground.wasm"));
   const module = await WebAssembly.compile(wasmBytes);
   assert.deepEqual(WebAssembly.Module.imports(module), []);
@@ -166,6 +176,35 @@ async function main() {
     if (entry.expected) assert.equal(result.output, entry.expected, entry.id);
     assert.equal(result.inspection.nodes[0].tag, "root", entry.id);
     for (const node of result.inspection.nodes) assert(result.inspection.tokens[node.main_token], entry.id + " node token link");
+    const model = layoutTree(result.inspection);
+    assert.deepEqual(model.nodes.map(node => node.index).sort((left, right) => left - right), result.inspection.nodes.map(node => node.index), entry.id + " projected nodes");
+    const edges = result.inspection.nodes.flatMap(node => node.children.map(child => `${node.index}:${child}`));
+    assert.deepEqual(model.branches.map(edge => `${edge.from}:${edge.to}`).sort(), edges.sort(), entry.id + " projected edges");
+    assert.deepEqual(model.leaves.map(node => node.index).sort((left, right) => left - right), result.inspection.nodes.filter(node => !node.children.length).map(node => node.index), entry.id + " terminal leaves");
+    for (const node of model.nodes) {
+      assert(Number.isFinite(node.x) && Number.isFinite(node.y), entry.id + " finite layout");
+      assert(node.x >= 0 && node.x <= 1 && node.y >= 0 && node.y <= 1, entry.id + " bounded layout");
+    }
+    const state = initialBranches(model);
+    assert(model.nodes.some(node => node.index === state.selected), entry.id + " registered initial selection");
+    const visible = branchView(result.inspection, state.expanded);
+    assert(visible.nodes.some(node => node.index === state.selected), entry.id + " selected node is visible");
+    for (const node of visible.nodes.filter(node => node.collapsed)) {
+      assert(!visible.leaves.some(leaf => leaf.index === node.index), entry.id + " collapsed branches are not leaves");
+    }
+    for (const leaf of model.leaves) {
+      const parents = nodePath(model, leaf.index);
+      assert.equal(parents[0].index, 0, entry.id + " leaf path reaches file root");
+      assert.equal(parents.at(-1).index, leaf.index);
+      const expanded = new Set([...state.expanded, ...parents.slice(0, -1).map(node => node.index)]);
+      const revealed = branchView(result.inspection, expanded);
+      assert(revealed.leaves.some(node => node.index === leaf.index), entry.id + " every terminal node can be revealed");
+    }
+    const lines = tokenLines(result.inspection, result.output);
+    assert(lines, entry.id + " formatted source token mapping");
+    for (const token of result.inspection.tokens) {
+      if (token.tag !== "eof") assert(lines[token.index], entry.id + " mapped token " + token.spelling);
+    }
     if (entry.body) {
       assert.equal(buildApiSource(entry.input, false),
         "// allocator + initialized context: *zast.AstContext\n" +
@@ -193,6 +232,19 @@ async function main() {
   assert.equal(configuration.nodes[0].children.length, 1);
   assert.equal(spelling(structure), "struct");
   assert.deepEqual(structure.children.map(index => spelling(configuration.nodes[index])), ["host", "port", "log_level", "token", "fn"]);
+  const recursive = layoutTree(configuration);
+  const branchState = initialBranches(recursive);
+  const selectedPath = nodePath(recursive, branchState.selected);
+  assert.equal(selectedPath.at(-1).label, "info", "initial nested enum member matches its default");
+  assert.equal(selectedPath.at(-1).tag, "identifier", "enum member is distinct from the .info initializer");
+  assert.equal(selectedPath.at(-2).tag, "container_field_init", "leaf retains its exact field owner");
+  const enumNode = selectedPath.find(node => node.label === "enum");
+  branchState.expanded.delete(enumNode.index);
+  const collapsed = branchView(configuration, branchState.expanded);
+  assert(collapsed.nodes.some(node => node.index === enumNode.index && node.collapsed));
+  assert(!collapsed.nodes.some(node => node.index === branchState.selected), "collapsing hides all descendant controls");
+  branchState.expanded.add(enumNode.index);
+  assert(branchView(configuration, branchState.expanded).leaves.some(node => node.index === branchState.selected), "expansion restores the registered leaf");
   const port = configuration.nodes[structure.children[1]];
   assert.deepEqual(port.children.map(index => spelling(configuration.nodes[index])), ["u16", "8080"]);
   const level = configuration.nodes[structure.children[2]];
@@ -309,7 +361,7 @@ async function main() {
   } finally {
     fs.rmSync(temporaryDirectory, { recursive: true, force: true });
   }
-  console.log(JSON.stringify({ wasmBytes: wasmBytes.length, imports: 0, fixtureCount: fixtures.length, catalogEntries: catalog.length, nativeBuilders: catalog.length + editedDescriptions.length, editedDescriptions: editedDescriptions.length, repeatedGenerations: 500, memoryBytes, checks: "exact rendering, strict validation, AST edges/token spans, recovery, bounded memory, native semantic compilation" }));
+  console.log(JSON.stringify({ wasmBytes: wasmBytes.length, imports: 0, fixtureCount: fixtures.length, catalogEntries: catalog.length, nativeBuilders: catalog.length + editedDescriptions.length, editedDescriptions: editedDescriptions.length, repeatedGenerations: 500, memoryBytes, checks: "exact rendering, strict validation, AST edges/token spans/tree projection, recovery, bounded memory, native semantic compilation" }));
 }
 
 module.exports = { checkWasm: main };

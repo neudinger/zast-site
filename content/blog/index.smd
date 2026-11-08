@@ -1,0 +1,17 @@
+---
+.title = "Blog",
+.description = "Implementation notes on Zig code generation, AST design, and this static learning site.",
+.date = .date("2026-10-21T00:00:00"),
+.layout = "content.shtml",
+.custom = .{ .kind = "article", .navigation = "blog" },
+---
+# 2026-10-21
+
+## [A static page, a real Zig generator](/blog/static-zig-playground/)
+
+Zine builds the pages from SuperMD. Zig and zast build a Wasm generator. The browser joins
+them together to turn editable JSON into formatted Zig, with no generation
+service in the request path.
+
+Read the architecture note for the build steps, memory boundary, and current
+scope of the example.

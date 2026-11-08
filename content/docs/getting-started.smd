@@ -91,6 +91,7 @@ or retry it as a complete AST.
 
 A `null` backing type generates `enum { ... }`. Set `.backing_type = "u8"` to
 emit `enum(u8) { ... }`. Explicit field values and a non-exhaustive catch-all
-require an explicit backing type.
+require an explicit backing type. Use the [online examples](/examples/) to inspect
+those forms without setting up another native program.
 
 [Return to the documentation overview](/docs/).
