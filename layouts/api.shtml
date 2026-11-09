@@ -1,0 +1,15 @@
+<extend template="base.shtml">
+<head id="site-head">
+<ctx :html="$build.asset('api-head').bytes()"></ctx>
+  <link rel="stylesheet" href="$site.asset('api.css').link()">
+</head>
+<main id="site-content">
+  <div class="api-reference page-width" data-reading-surface="api">
+    <header class="api-intro"><p class="eyebrow">ZAST / LIBRARY REFERENCE</p><h1>API reference</h1><p>Component declarations, usage examples, and source. Generated with Zig 0.17.0.</p></header>
+    <div class="code-reading-controls" role="group" aria-label="Code reading preferences">
+      <label>Code size <select data-code-size aria-label="Code font size"><option value="">Default</option><option value="14">14px</option><option value="16">16px</option><option value="18">18px</option><option value="20">20px</option><option value="24">24px</option><option value="28">28px</option></select></label>
+      <label><input type="checkbox" data-code-wrap>Wrap examples</label>
+    </div>
+    <div class="api-content" :html="$build.asset('api-body').bytes()"></div>
+  </div>
+</main>

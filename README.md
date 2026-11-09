@@ -5,6 +5,7 @@ Built with Zine, SuperMD, and shared SuperHTML layouts.
 The example catalogue is generated from the pinned Zast guide.
 The generator compiles JSON descriptions to Zig and AST data in WebAssembly.
 The homepage viewer and playground run the generator locally in the browser.
+The API reference comes from the pinned Zig compiler and Zast package.
 
 ## Requirements
 
@@ -21,6 +22,7 @@ zig build test
 zig build sync-examples
 zig build catalog
 zig build wasm
+zig build api
 ~~~
 
 The site is written to `dist/` with the `/zast-site/` deployment prefix.

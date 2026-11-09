@@ -1,5 +1,5 @@
 //! Build adapter for native commands and library artifacts.
-//! These methods declare steps. Wasm compilation consumes Zast's exported module.
+//! These methods declare steps. Wasm and API compilation consume Zast's exported module.
 //! The graph owns its references and library paths; no deinit is needed. Named commands and
 //! dependency lists stay in build.zig; addRun() schedules rather than executes work.
 const std = @import("std");
@@ -20,6 +20,8 @@ pub const Command = union(enum) {
     catalog,
     /// Sync the guide from the declared library package directory.
     @"sync-examples": Build.LazyPath,
+    /// Tracked compiler documentation input; the caller declares the output directory.
+    @"prepare-api": Build.LazyPath,
 };
 
 // Native command steps.
@@ -43,7 +45,8 @@ pub fn init(builder: *Build) Self {
 
 /// Schedule a command with explicit prerequisites and tracked artifact arguments.
 /// dependencies is borrowed only for this call; pass &.{} for no extra prerequisites.
-/// Commands modify generated files in the project directory.
+/// The caller declares the prepare-api output directory; its four inputs are tracked here.
+/// Other commands modify generated files in the project directory.
 pub fn addRun(self: Self, command: Command, dependencies: []const *Step) *Step.Run {
     const step = self.builder.addRunArtifact(self.executable);
     step.addArg(@tagName(command));
@@ -54,6 +57,13 @@ pub fn addRun(self: Self, command: Command, dependencies: []const *Step) *Step.R
         .@"sync-examples" => |directory| step.addDirectoryArg2(directory, .{
             .make_absolute = true,
         }),
+        .@"prepare-api" => |path| {
+            step.has_side_effects = false;
+            step.addDirectoryArg2(path, .{ .make_absolute = true });
+            // Directory arguments track paths, not the files consumed by the command.
+            for ([_][]const u8{ "index.html", "main.js", "main.wasm", "sources.tar" }) |name|
+                step.addFileInput(path.path(self.builder, name));
+        },
     }
     for (dependencies) |dependency| step.step.dependOn(dependency);
     return step;
@@ -106,4 +116,25 @@ pub fn addCompile(
     };
     for (dependencies) |dependency| artifact.step.dependOn(dependency);
     return artifact;
+}
+
+/// Declare compiler documentation and prepare its viewer assets in the build cache.
+/// Return both directories and the preparation step for the caller's assets, tests, and commands.
+pub fn addApiDocumentation(self: Self, library: *Build.Module) struct {
+    documentation_directory: Build.LazyPath,
+    prepared_directory: Build.LazyPath,
+    step: *Step,
+} {
+    const builder = self.builder;
+    const documentation = builder.addLibrary(.{
+        .name = "zast",
+        .root_module = library,
+    });
+    const documentation_directory = documentation.getEmittedDocs();
+    const prepare = self.addRun(.{ .@"prepare-api" = documentation_directory }, &.{});
+    return .{
+        .documentation_directory = documentation_directory,
+        .prepared_directory = prepare.addOutputDirectoryArg2("api", .{ .make_absolute = true }),
+        .step = &prepare.step,
+    };
 }

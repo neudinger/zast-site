@@ -1,0 +1,7 @@
+---
+.title = "API reference · zast",
+.description = "Component declarations, usage examples, and source from the zast library.",
+.date = .date("2026-10-25T00:00:00"),
+.layout = "api.shtml",
+.custom = .{ .kind = "api", .navigation = "api" },
+---

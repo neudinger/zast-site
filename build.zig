@@ -3,6 +3,7 @@
 const std = @import("std");
 const manifest = @import("build.zig.zon");
 const Tools = @import("tools/Tools.zig");
+const api = @import("tools/api.zig");
 const Build = std.Build;
 
 comptime {
@@ -39,6 +40,9 @@ pub fn build(builder: *Build) void {
     wasm_step.dependOn(&wasm.step);
     wasm_step.dependOn(&catalog.step);
 
+    const reference = tools.addApiDocumentation(zast.module("zast"));
+    builder.step("api", "Build and prepare the library API reference").dependOn(reference.step);
+
     const release = builder.addRunArtifact(zine);
     release.setCwd(builder.path("."));
     release.has_side_effects = true;
@@ -47,12 +51,20 @@ pub fn build(builder: *Build) void {
     release.addArg("--build-asset=playground");
     release.addFileArg2(wasm.getEmittedBin(), .{});
     release.addArg("--install-always=playground.wasm");
+    for (api.assets) |asset| {
+        release.addArg(builder.fmt("--build-asset={s}", .{asset.name}));
+        release.addFileArg2(reference.prepared_directory.path(builder, asset.file), .{});
+        if (asset.install) |path| release.addArg(builder.fmt("--install-always={s}", .{path}));
+    }
     builder.getInstallStep().dependOn(&release.step);
 
     const tests = builder.addSystemCommand(&.{ "node", "tests/stage.cjs" });
     tests.setCwd(builder.path("."));
     tests.setEnvironmentVariable("ZIG", builder.graph.zig_exe);
     tests.addDirectoryArg2(zast.path("."), .{ .make_absolute = true });
+    tests.addDirectoryArg2(reference.documentation_directory, .{
+        .make_absolute = true,
+    });
     tests.step.dependOn(&release.step);
     builder.step("test", "Build and test the website").dependOn(&tests.step);
 }

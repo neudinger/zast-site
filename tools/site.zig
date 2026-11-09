@@ -1,6 +1,7 @@
-//! Native example catalogue and guide synchronization.
+//! Native catalogue and compiler documentation preparation.
 const std = @import("std");
 pub const catalog = @import("catalog.zig");
+pub const api = @import("api.zig");
 
 pub const std_options: std.Options = .{ .log_level = .warn };
 
@@ -21,7 +22,7 @@ pub fn main(init: std.process.Init) !void {
     defer arena.deinit();
     const allocator = arena.allocator();
     const arguments = try init.minimal.args.toSlice(allocator);
-    const Command = enum { clean, catalog, @"sync-examples" };
+    const Command = enum { clean, catalog, @"sync-examples", @"prepare-api" };
     if (arguments.len < 2) return error.ExpectedCommand;
     const command = std.meta.stringToEnum(Command, arguments[1]) orelse return error.UnknownCommand;
     switch (command) {
@@ -36,6 +37,10 @@ pub fn main(init: std.process.Init) !void {
         .@"sync-examples" => {
             if (arguments.len != 3) return error.ExpectedLibraryDirectory;
             try catalog.sync(allocator, init.io, arguments[2]);
+        },
+        .@"prepare-api" => {
+            if (arguments.len != 4) return error.ExpectedApiInputAndOutputDirectories;
+            try api.prepare(allocator, init.io, arguments[2], arguments[3]);
         },
     }
 }

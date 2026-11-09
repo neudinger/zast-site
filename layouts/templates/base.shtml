@@ -19,6 +19,7 @@
     <a class="$site.index().isCurrent().then('brand active', 'brand')" href="$site.index().link()" aria-label="zast home" aria-current="$site.index().isCurrent().then('page', 'false')"><span>zast</span><span class="brand-separator">/</span><span class="brand-product">Zig Abstract Syntax Tree</span></a>
     <nav class="primary-nav" aria-label="Main navigation">
       <a href="$site.page('docs').link()" class="$page.custom.get('navigation').eql('docs').then('active')" aria-current="$site.page('docs').isCurrent().then('page', 'false')">Documentation</a>
+      <a href="$site.page('docs/api').link()" class="$page.custom.get('navigation').eql('api').then('active')" aria-current="$site.page('docs/api').isCurrent().then('page', 'false')">API Reference</a>
       <a href="$site.page('blog').link()" class="$page.custom.get('navigation').eql('blog').then('active')" aria-current="$site.page('blog').isCurrent().then('page', 'false')">Blog</a>
       <a href="$site.page('examples').link()" class="$page.custom.get('navigation').eql('examples').then('active')" aria-current="$site.page('examples').isCurrent().then('page', 'false')">Playground</a>
       <a class="repository-link" href="https://github.com/neudinger/zast/"><img src="$site.asset('icons/github.svg').link()" alt="" class="icon" width="18" height="18">GitHub</a>

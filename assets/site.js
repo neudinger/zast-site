@@ -1,8 +1,18 @@
 import { highlightJson, highlightZig } from "./highlight.js";
+import { highlightApiExamples } from "./api-examples.js";
 
 const siteRoot = new URL("./", import.meta.url);
 
-if (location.pathname === siteRoot.pathname && location.hash.startsWith("#code=")) {
+// Keep the shared skip link out of the API viewer's symbol hash routing.
+if (document.body.dataset.page === "api") {
+  highlightApiExamples(document.querySelector(".api-content"));
+  document.querySelector(".skip-link").addEventListener("click", event => {
+    event.preventDefault();
+    const content = document.getElementById("site-content");
+    content.setAttribute("tabindex", "-1");
+    content.focus();
+  });
+} else if (location.pathname === siteRoot.pathname && location.hash.startsWith("#code=")) {
   // Preserve links shared before the playground moved to /examples/.
   location.replace(new URL("examples/" + location.hash, siteRoot).href);
 } else {
