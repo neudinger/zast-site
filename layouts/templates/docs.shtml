@@ -1,0 +1,48 @@
+<extend template="base.shtml">
+<head id="site-head">
+  <super>
+  <link rel="stylesheet" href="$site.asset('docs.css').link()">
+  <script type="module" src="$site.asset('docs.js').link()"></script>
+</head>
+<main id="site-content">
+  <div class="docs-shell" data-docs>
+    <div class="docs-toolbar">
+      <div class="docs-toolbar-title"><button type="button" class="docs-menu-button" data-menu-open aria-controls="docs-menu" aria-expanded="false">Menu</button><a href="$page.custom.get('kind').eql('api').then($site.page('docs/api').link(), $site.page('docs').link())" :text="$page.custom.get('kind').eql('api').then('API Reference', 'Documentation')"></a></div>
+      <button class="docs-search-trigger" type="button" data-search-open aria-haspopup="dialog"><span>Search documentation and symbols…</span><kbd>⌘ K</kbd></button>
+      <span class="docs-version">Zig 0.17.0</span>
+    </div>
+    <div class="docs-grid">
+      <aside class="docs-sidebar" aria-label="Documentation navigation">
+        <div data-api-tree :if="$page.custom.get('kind').eql('api')"><p class="docs-loading" role="status">Loading public symbols…</p></div>
+        <nav class="docs-guides" aria-label="Guides">
+          <p class="docs-nav-label">GUIDES</p>
+          <ul class="docs-guide-tree">
+            <li><a href="$site.page('docs').link()" aria-current="$site.page('docs').isCurrent().then('page', 'false')">Documentation overview</a></li>
+            <li><a href="$site.page('docs/getting-started').link()" aria-current="$site.page('docs/getting-started').isCurrent().then('page', 'false')">Your first declaration</a></li>
+            <li><a href="$site.page('docs/examples').link()" aria-current="$site.page('docs/examples').isCurrent().then('page', 'false')">Copyable examples</a></li>
+          </ul>
+          <p class="docs-nav-label">EXPLORE</p>
+          <a class="docs-explore-link" href="$site.page('docs/api').link()">Library reference<img class="icon" src="$site.asset('icons/arrow-right.svg').link()" alt="" width="16" height="16"></a>
+          <a class="docs-explore-link" href="$site.page('examples').link()">Playground<img class="icon" src="$site.asset('icons/arrow-right.svg').link()" alt="" width="16" height="16"></a>
+        </nav>
+      </aside>
+      <div class="docs-main">
+        <nav class="docs-breadcrumbs" data-breadcrumbs aria-label="Breadcrumb"><a href="$site.page('docs').link()">Documentation</a><span aria-hidden="true">/</span><span :text="$page.title"></span></nav>
+        <details class="docs-inline-toc"><summary>On this page</summary><nav data-inline-toc aria-label="Page sections"></nav></details>
+        <div id="docs-content"><super></div>
+      </div>
+      <aside class="docs-aside" aria-label="Page context">
+        <nav aria-label="On this page"><h2>On this page</h2><div data-toc></div></nav>
+        <div class="docs-related"><h2>Related reference</h2><div data-related><a href="$site.page('docs/api').link()">Library reference</a><a href="$site.page('docs/getting-started').link()">Your first declaration</a></div></div>
+        <a class="docs-source-link" data-source href="https://github.com/neudinger/zast-site/tree/main/content/docs">View source</a>
+      </aside>
+    </div>
+    <dialog id="docs-menu" class="docs-menu-dialog" aria-label="Documentation menu"><button type="button" class="docs-dialog-close" data-menu-close>Close menu</button></dialog>
+    <dialog class="docs-search-dialog" data-search-dialog aria-labelledby="docs-search-label">
+      <div class="docs-search-input-row"><label id="docs-search-label" class="visually-hidden" for="docs-query">Search documentation and public API symbols</label><input id="docs-query" type="search" placeholder="Search documentation and symbols…" autocomplete="off" spellcheck="false" role="combobox" aria-controls="docs-results" aria-expanded="true" aria-autocomplete="list"><button type="button" class="docs-dialog-close" data-search-close>Close</button></div>
+      <p class="docs-search-status" data-search-status role="status"></p>
+      <ul id="docs-results" class="docs-search-results" role="listbox" aria-label="Search results"></ul>
+      <p class="docs-search-hint">Arrow keys to navigate · Enter to open · Esc to close</p>
+    </dialog>
+  </div>
+</main>

@@ -15,6 +15,7 @@
         "examples.js",
         "highlight.js",
         "api-examples.js",
+        "docs-model.js",
         "rotation.js",
         "tree.js",
         "ast-leaf.webp",
