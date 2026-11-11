@@ -1,9 +1,8 @@
 //! zvm-lock: 0.17.0
-//! Build the Zast website with its pinned Zine engine.
+//! Build Zine, the browser generator, and API reference with one compiler.
 const std = @import("std");
 const manifest = @import("build.zig.zon");
 const Tools = @import("tools/Tools.zig");
-const api = @import("tools/api.zig");
 const Build = std.Build;
 
 comptime {
@@ -15,6 +14,7 @@ comptime {
 }
 
 pub fn build(builder: *Build) void {
+    // Shared configuration: Zine engine and native site tool with its library paths.
     const zine = builder.dependency("zine", .{
         .target = builder.graph.host,
         .optimize = .ReleaseFast,
@@ -26,45 +26,128 @@ pub fn build(builder: *Build) void {
         .target = builder.graph.host,
         .optimize = .Debug,
     });
+    const library = zast.module("zast");
     const tools = Tools.init(builder);
+
+    const purge = purge_blk: {
+        const command = builder.addSystemCommand(&.{
+            "rm", "-rf", "--", "zig-out", "zig-pkg", ".zig-cache",
+        });
+        command.setCwd(builder.path("."));
+        command.has_side_effects = true;
+        break :purge_blk command;
+    };
+
+    const update_zast = update_zast_blk: {
+        if (!@hasField(@TypeOf(manifest.dependencies.zast), "hash")) {
+            const failure = builder.addFail("Enable the Zast GitHub pin in build.zig.zon first.");
+            break :update_zast_blk &failure.step;
+        }
+        const command = builder.addSystemCommand(&.{
+            builder.graph.zig_exe,
+            "fetch",
+            "--save=zast",
+            "git+https://github.com/neudinger/zast#refs/heads/main",
+        });
+        command.setCwd(builder.path("."));
+        command.has_side_effects = true;
+        break :update_zast_blk &command.step;
+    };
+
     const clean = tools.addRun(.clean, &.{});
     const sync = tools.addRun(.{ .@"sync-examples" = zast.path(".") }, &.{});
     const catalog = tools.addRun(.catalog, &.{&sync.step});
 
-    builder.step("clean", "Remove the generated website and guide snapshots").dependOn(&clean.step);
-    builder.step("sync-examples", "Refresh the guide snapshots").dependOn(&sync.step);
-    builder.step("catalog", "Generate the copyable example catalogue").dependOn(&catalog.step);
-
     const wasm = tools.addCompile(.wasm, &.{&sync.step});
-    const wasm_step = builder.step("wasm", "Build the browser generator and catalogue");
-    wasm_step.dependOn(&wasm.step);
-    wasm_step.dependOn(&catalog.step);
 
-    const reference = tools.addApiDocumentation(zast.module("zast"));
-    builder.step("api", "Build and prepare the library API reference").dependOn(reference.step);
+    const api = tools.addApiDocumentation(library);
 
-    const release = builder.addRunArtifact(zine);
-    release.setCwd(builder.path("."));
-    release.has_side_effects = true;
-    release.addArgs(&.{ "release", "--output=dist", "--force" });
-    release.step.dependOn(&catalog.step);
-    release.addArg("--build-asset=playground");
-    release.addFileArg2(wasm.getEmittedBin(), .{});
-    release.addArg("--install-always=playground.wasm");
-    for (api.assets) |asset| {
-        release.addArg(builder.fmt("--build-asset={s}", .{asset.name}));
-        release.addFileArg2(reference.prepared_directory.path(builder, asset.file), .{});
-        if (asset.install) |path| release.addArg(builder.fmt("--install-always={s}", .{path}));
+    // Site build / preview -> native tool + Zine + Wasm + prepared API + catalog.
+    // Artifact arguments add compilation dependencies; catalog is linked explicitly.
+    const site = site_commands_blk: {
+        const assets: Tools.SiteAssets = .{
+            .zine = zine,
+            .wasm = wasm,
+            .api = api.prepared_directory,
+        };
+        const release = tools.addRun(.{ .build = assets }, &.{&catalog.step});
+        const preview = tools.addRun(.{ .serve = assets }, &.{&catalog.step});
+        // Default `zig build` -> native tool installation + complete site build.
+        builder.getInstallStep().dependOn(&release.step);
+        break :site_commands_blk .{ .build = release, .serve = preview };
+    };
+
+    // Both test suites require the completed site.
+    const tests = tools.addTests(
+        zine,
+        wasm,
+        api.documentation_directory,
+        library.root_source_file.?,
+        &.{&site.build.step},
+    );
+
+    inline for (.{
+        // clean -> native tool only; do not regenerate outputs before removing them.
+        .{
+            .tag = .clean,
+            .description = "Remove the generated website, catalogue, and guide snapshots",
+            .prerequisites = .{&clean.step},
+        },
+        // purge -> rm only; remove local Zig outputs without compiling or generating the site.
+        .{
+            .tag = .purge,
+            .description = "Remove local .zig-cache, zig-out, and zig-pkg directories",
+            .prerequisites = .{&purge.step},
+        },
+        .{
+            .tag = .@"update-zast",
+            .description = "Pin Zast to the latest GitHub main commit",
+            .prerequisites = .{update_zast},
+        },
+        // catalog -> sync-examples + native tool -> regenerate the catalogue.
+        .{
+            .tag = .catalog,
+            .description = "Sync guide snapshots, then rebuild the catalogue and copyable examples",
+            .prerequisites = .{&catalog.step},
+        },
+        // sync-examples -> native tool + selected library guide -> refresh snapshots.
+        .{
+            .tag = .@"sync-examples",
+            .description = "Refresh and format the explicit guide snapshots",
+            .prerequisites = .{&sync.step},
+        },
+        // wasm -> browser generator compilation + catalog.
+        .{
+            .tag = .wasm,
+            .description = "Build the browser generator and catalogue",
+            .prerequisites = .{ &wasm.step, &catalog.step },
+        },
+        // api -> compiler documentation + native tool -> prepared API assets.
+        .{
+            .tag = .api,
+            .description = "Build and prepare the library API reference",
+            .prerequisites = .{api.step},
+        },
+        // serve -> all site prerequisites above -> Zine's development server.
+        .{
+            .tag = .serve,
+            .description = "Preview at http://127.0.0.1:1990/",
+            .prerequisites = .{&site.serve.step},
+        },
+        // test-supermd -> site build + native integration tests and interruption fixture.
+        .{
+            .tag = .@"test-supermd",
+            .description = "Compatibility alias: test Zine content, layouts, API, and preview",
+            .prerequisites = .{&tests.content.step},
+        },
+        // test -> site build + native integration tests + Node/Wasm tests.
+        .{
+            .tag = .@"test",
+            .description = "Test Zine content, preview, Wasm, and generated Zig",
+            .prerequisites = .{ &tests.content.step, &tests.browser.step },
+        },
+    }) |command| {
+        const command_step = builder.step(@tagName(command.tag), command.description);
+        inline for (command.prerequisites) |prerequisite| command_step.dependOn(prerequisite);
     }
-    builder.getInstallStep().dependOn(&release.step);
-
-    const tests = builder.addSystemCommand(&.{ "node", "tests/stage.cjs" });
-    tests.setCwd(builder.path("."));
-    tests.setEnvironmentVariable("ZIG", builder.graph.zig_exe);
-    tests.addDirectoryArg2(zast.path("."), .{ .make_absolute = true });
-    tests.addDirectoryArg2(reference.documentation_directory, .{
-        .make_absolute = true,
-    });
-    tests.step.dependOn(&release.step);
-    builder.step("test", "Build and test the website").dependOn(&tests.step);
 }

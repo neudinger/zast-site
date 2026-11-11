@@ -11,7 +11,7 @@ Published **2026-10-21**.
 
 The website and the generator are separate build products. **Zine** parses
 the SuperMD content and renders shared SuperHTML layouts, navigation, and assets.
-**Zig 0.17.0** compiles
+A native Zig coordinator validates the complete release. **Zig 0.17.0** compiles
 the generator with the pinned Zast package for `wasm32-freestanding`. The final
 site contains HTML, CSS, JavaScript, artwork, and the compiled `.wasm` asset.
 

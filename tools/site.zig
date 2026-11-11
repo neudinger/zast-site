@@ -1,7 +1,9 @@
-//! Native catalogue and compiler documentation preparation.
+//! Native catalogue, compiler-documentation adaptation, and Zine coordination.
 const std = @import("std");
 pub const catalog = @import("catalog.zig");
+pub const website = @import("website.zig");
 pub const api = @import("api.zig");
+pub const files = @import("files.zig");
 
 pub const std_options: std.Options = .{ .log_level = .warn };
 
@@ -22,7 +24,7 @@ pub fn main(init: std.process.Init) !void {
     defer arena.deinit();
     const allocator = arena.allocator();
     const arguments = try init.minimal.args.toSlice(allocator);
-    const Command = enum { clean, catalog, @"sync-examples", @"prepare-api" };
+    const Command = enum { clean, catalog, @"sync-examples", @"prepare-api", build, serve };
     if (arguments.len < 2) return error.ExpectedCommand;
     const command = std.meta.stringToEnum(Command, arguments[1]) orelse return error.UnknownCommand;
     switch (command) {
@@ -41,6 +43,13 @@ pub fn main(init: std.process.Init) !void {
         .@"prepare-api" => {
             if (arguments.len != 4) return error.ExpectedApiInputAndOutputDirectories;
             try api.prepare(allocator, init.io, arguments[2], arguments[3]);
+        },
+        .build, .serve => {
+            if (arguments.len != 5) return error.ExpectedZineWasmAndApiPaths;
+            const options: website.Options = .{ .zine_executable = arguments[2], .wasm_file = arguments[3], .api_directory = arguments[4] };
+            if (command == .serve) return website.serve(allocator, init.io, options);
+            const result = try website.build(allocator, init.io, options);
+            std.debug.print("Built {d} pages with {d} local references using Zine.\n", .{ result.pages, result.references });
         },
     }
 }

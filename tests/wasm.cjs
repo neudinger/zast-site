@@ -5,13 +5,15 @@ const path = require("node:path");
 const childProcess = require("node:child_process");
 
 async function main() {
-  const libraryRoot = process.env.ZAST_ROOT;
-  assert(libraryRoot, "Run this suite with zig build test");
-  const librarySource = path.join(libraryRoot, "src", "root.zig");
+  const librarySource = process.argv[2];
+  assert(librarySource, "Run this suite with zig build test");
   const siteDirectory = path.resolve(__dirname, "..");
+  assert(WebAssembly.validate(fs.readFileSync(path.join(siteDirectory, "dist/docs/api/main.wasm"))));
   await require("./rotation.cjs").checkRotation();
   await require("./tree.cjs").checkTree();
   await require("./reading.cjs").checkReading();
+  await require("./api-examples.cjs").checkApiExamples();
+  await require("./docs.cjs").checkDocs();
   const { layoutTree, tokenLines, initialBranches, branchView, nodePath } = await import("../assets/tree.js");
   const { catalog, buildApiSource } = await import("../assets/examples.js");
   assert.equal(catalog.length, 24);
@@ -364,8 +366,4 @@ async function main() {
   console.log(JSON.stringify({ wasmBytes: wasmBytes.length, imports: 0, fixtureCount: fixtures.length, catalogEntries: catalog.length, nativeBuilders: catalog.length + editedDescriptions.length, editedDescriptions: editedDescriptions.length, repeatedGenerations: 500, memoryBytes, checks: "exact rendering, strict validation, AST edges/token spans/tree projection, recovery, bounded memory, native semantic compilation" }));
 }
 
-module.exports = { checkWasm: main };
-
-if (require.main === module) {
-  main().catch(failure => { console.error(failure); process.exitCode = 1; });
-}
+main().catch(failure => { console.error(failure); process.exitCode = 1; });
