@@ -61,7 +61,8 @@ pub fn init(builder: *Build) Self {
 /// The caller declares the prepare-api output directory; its four inputs are tracked here.
 /// Other commands modify the source tree, replace dist/, or run the live server.
 pub fn addRun(self: Self, command: Command, dependencies: []const *Step) *Step.Run {
-    const step = self.builder.addRunArtifact(self.executable);
+    // Keep the cache input path stable when installation and preparation run in parallel.
+    const step = self.builder.addRunFile(self.executable.getEmittedBin());
     step.addArg(@tagName(command));
     step.setCwd(self.builder.path("."));
     step.has_side_effects = true;

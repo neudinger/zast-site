@@ -9,6 +9,7 @@ const Fixture = struct {
     temporary: std.testing.TmpDir,
     arena: std.heap.ArenaAllocator,
     directory: []const u8,
+    install_tool_first: bool = false,
 
     fn init() !Fixture {
         var temporary = std.testing.tmpDir(.{});
@@ -49,11 +50,20 @@ const Fixture = struct {
             \\    }, &.{});
             \\    const output = prepare.addOutputDirectoryArg2("api", .{ .make_absolute = true });
             \\    prepare.setName("prepare-api-fixture");
-            \\    builder.getInstallStep().dependOn(&builder.addInstallDirectory(.{
+            \\    const install_output = builder.addInstallDirectory(.{
             \\        .source_dir = output,
             \\        .install_dir = .prefix,
             \\        .install_subdir = "api",
-            \\    }).step);
+            \\    });
+            \\    builder.step("prepare-fixture", "Install the prepared API files")
+            \\        .dependOn(&install_output.step);
+            \\    const install_tool_first = builder.option(
+            \\        bool, "install-first", "Install the coordinator before preparation",
+            \\    ) orelse false;
+            \\    if (install_tool_first) {
+            \\        const install_tool = builder.addInstallArtifact(tools.executable, .{});
+            \\        prepare.step.dependOn(&install_tool.step);
+            \\    }
             \\}
             \\
         );
@@ -84,7 +94,15 @@ const Fixture = struct {
         try environment.put("ZIG_LOCAL_CACHE_DIR", try self.path(".zig-cache"));
         const result = try std.process.run(self.arena.allocator(), std.testing.io, .{
             .argv = &.{
-                paths.zig_executable, "build", "--summary", "all", "--color", "off", "-j2",
+                paths.zig_executable,
+                "build",
+                "prepare-fixture",
+                if (self.install_tool_first) "-Dinstall-first=true" else "-Dinstall-first=false",
+                "--summary",
+                "all",
+                "--color",
+                "off",
+                "-j2",
             },
             .cwd = .{ .path = self.directory },
             .environ_map = &environment,
@@ -108,6 +126,8 @@ test "API preparation caches unchanged inputs and tracks every compiler document
     var fixture = try Fixture.init();
     defer fixture.deinit();
     try fixture.run(false);
+    // Force the coordinator install to finish before the second preparation.
+    fixture.install_tool_first = true;
     try fixture.run(true);
     const allocator = fixture.arena.allocator();
     for ([_]struct { input: []const u8, output: []const u8 }{
