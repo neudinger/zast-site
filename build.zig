@@ -43,14 +43,7 @@ pub fn build(builder: *Build) void {
             const failure = builder.addFail("Enable the Zast GitHub pin in build.zig.zon first.");
             break :update_zast_blk &failure.step;
         }
-        const command = builder.addSystemCommand(&.{
-            builder.graph.zig_exe,
-            "fetch",
-            "--save=zast",
-            "git+https://github.com/neudinger/zast#refs/heads/main",
-        });
-        command.setCwd(builder.path("."));
-        command.has_side_effects = true;
+        const command = tools.addRun(.{ .@"update-zast" = builder.graph.zig_exe }, &.{});
         break :update_zast_blk &command.step;
     };
 

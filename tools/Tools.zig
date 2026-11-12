@@ -25,6 +25,8 @@ pub const Command = union(enum) {
     clean,
     /// Generate the catalogue after the caller's snapshot dependency.
     catalog,
+    /// Resolve GitHub main and save its commit with the supplied Zig executable.
+    @"update-zast": []const u8,
     /// Sync the guide from the declared library package directory.
     @"sync-examples": Build.LazyPath,
     /// Tracked compiler documentation input; the caller declares the output directory.
@@ -65,6 +67,7 @@ pub fn addRun(self: Self, command: Command, dependencies: []const *Step) *Step.R
     step.has_side_effects = true;
     switch (command) {
         .clean, .catalog => {},
+        .@"update-zast" => |zig_executable| step.addArg(zig_executable),
         .@"sync-examples" => |directory| step.addDirectoryArg2(directory, .{
             .make_absolute = true,
         }),

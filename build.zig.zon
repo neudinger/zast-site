@@ -6,7 +6,7 @@
     .dependencies = .{
         // .zast = .{ .path = "../zast" },
         .zast = .{
-            .url = "git+https://github.com/neudinger/zast#63ab94c4f9226a31f68a031477d9fc4336c3d6b5",
+            .url = "git+https://github.com/neudinger/zast#443eb50c379751bbbfb63db41e12f4d88e0b0cce",
             .hash = "zast-0.0.0-SB4Hrz2mHgA67GOUPcBsErlUxzgPPiBmz741UC7tsz_K",
         },
         .zine = .{

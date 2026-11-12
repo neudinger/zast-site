@@ -9,9 +9,6 @@ The playground runs the Zig generator locally in the browser through WebAssembly
 - **Zig 0.17.0**, enforced by the build and ZVM directive.
 - **Node.js 22 or newer** for JavaScript/Wasm tests only.
 
-Zig fetches Zast and Zine as needed at the revisions pinned in
-[build.zig.zon](build.zig.zon).
-
 ## Build and preview
 
 Run from this directory:

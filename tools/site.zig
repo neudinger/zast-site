@@ -19,12 +19,50 @@ pub fn clean(io: std.Io, directory: std.Io.Dir) !void {
     }) |path| try directory.deleteTree(io, path);
 }
 
+/// Resolve the branch before passing the exact commit URL to Zig's package manager.
+fn updateZast(allocator: std.mem.Allocator, io: std.Io, zig_executable: []const u8) !void {
+    const repository = "https://github.com/neudinger/zast";
+    const branch = "refs/heads/main";
+    const resolved = try std.process.run(allocator, io, .{
+        .argv = &.{ "git", "ls-remote", "--exit-code", repository, branch },
+        .stdout_limit = .limited(4096),
+        .stderr_limit = .limited(64 * 1024),
+    });
+    defer allocator.free(resolved.stdout);
+    defer allocator.free(resolved.stderr);
+    if (!resolved.term.success()) {
+        std.debug.print("{s}", .{resolved.stderr});
+        return error.ZastRefLookupFailed;
+    }
+
+    const line = std.mem.trimEnd(u8, resolved.stdout, "\r\n");
+    const commit, const ref = std.mem.cutScalar(u8, line, '\t') orelse return error.InvalidZastRef;
+    if (commit.len != 40 or !std.mem.eql(u8, ref, branch)) return error.InvalidZastRef;
+    for (commit) |digit| if (!std.ascii.isHex(digit)) return error.InvalidZastRef;
+
+    const url = try std.fmt.allocPrint(allocator, "git+{s}#{s}", .{ repository, commit });
+    defer allocator.free(url);
+    var fetch = try std.process.spawn(io, .{
+        .argv = &.{ zig_executable, "fetch", "--save-exact=zast", url },
+    });
+    defer fetch.kill(io);
+    if (!(try fetch.wait(io)).success()) return error.ZastFetchFailed;
+}
+
 pub fn main(init: std.process.Init) !void {
     var arena = std.heap.ArenaAllocator.init(init.gpa);
     defer arena.deinit();
     const allocator = arena.allocator();
     const arguments = try init.minimal.args.toSlice(allocator);
-    const Command = enum { clean, catalog, @"sync-examples", @"prepare-api", build, serve };
+    const Command = enum {
+        clean,
+        catalog,
+        @"update-zast",
+        @"sync-examples",
+        @"prepare-api",
+        build,
+        serve,
+    };
     if (arguments.len < 2) return error.ExpectedCommand;
     const command = std.meta.stringToEnum(Command, arguments[1]) orelse return error.UnknownCommand;
     switch (command) {
@@ -35,6 +73,10 @@ pub fn main(init: std.process.Init) !void {
         .catalog => {
             if (arguments.len != 2) return error.UnexpectedArguments;
             try catalog.build(allocator, init.io);
+        },
+        .@"update-zast" => {
+            if (arguments.len != 3) return error.ExpectedZigExecutable;
+            try updateZast(allocator, init.io, arguments[2]);
         },
         .@"sync-examples" => {
             if (arguments.len != 3) return error.ExpectedLibraryDirectory;
